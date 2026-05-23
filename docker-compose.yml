@@ -1,0 +1,38 @@
+services:
+  wp_mariadb:
+    image: mariadb:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wpuser
+      MYSQL_PASSWORD: wppass
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    networks:
+      - wp_network
+
+  wp_php:
+    build: ./php
+    volumes:
+      - .:/var/www/html
+    networks:
+      - wp_network
+    depends_on:
+      - wp_mariadb
+
+  wp_nginx:
+    build: ./nginx
+    ports:
+      - "8090:80"
+    volumes:
+      - .:/var/www/html
+    networks:
+      - wp_network
+    depends_on:
+      - wp_php
+
+networks:
+  wp_network:
+
+volumes:
+  mariadb_data:
