@@ -2044,7 +2044,7 @@ function sanitize_file_name( $filename ) {
 		$filename = sanitize_title_with_dashes( $_name ) . '.' . $_ext;
 	}
 
-	if ( _wp_can_use_pcre_u() ) {
+	if ( true ) {
 		/**
 		 * Replace all whitespace characters with a basic space (U+0020).
 		 *
@@ -5898,7 +5898,7 @@ function wp_enqueue_emoji_styles() {
  *
  * @since 4.2.0
  */
-function print_emoji_detection_script(): void {
+function print_emoji_detection_script() {
 	static $printed = false;
 
 	if ( $printed ) {
@@ -5907,18 +5907,10 @@ function print_emoji_detection_script(): void {
 
 	$printed = true;
 
-	if ( is_admin() ) {
-		if ( did_action( 'admin_print_footer_scripts' ) ) {
-			_print_emoji_detection_script();
-		} else {
-			add_action( 'admin_print_footer_scripts', '_print_emoji_detection_script' );
-		}
+	if ( did_action( 'wp_print_footer_scripts' ) ) {
+		_print_emoji_detection_script();
 	} else {
-		if ( did_action( 'wp_print_footer_scripts' ) ) {
-			_print_emoji_detection_script();
-		} else {
-			add_action( 'wp_print_footer_scripts', '_print_emoji_detection_script' );
-		}
+		add_action( 'wp_print_footer_scripts', '_print_emoji_detection_script' );
 	}
 }
 
@@ -6243,7 +6235,7 @@ function url_shorten( $url, $length = 35 ) {
  * @since 3.4.0
  *
  * @param string $color
- * @return string|null The sanitized hex color, or null if invalid.
+ * @return string|void
  */
 function sanitize_hex_color( $color ) {
 	if ( '' === $color ) {
@@ -6254,7 +6246,6 @@ function sanitize_hex_color( $color ) {
 	if ( preg_match( '|^#([A-Fa-f0-9]{3}){1,2}$|', $color ) ) {
 		return $color;
 	}
-	return null;
 }
 
 /**

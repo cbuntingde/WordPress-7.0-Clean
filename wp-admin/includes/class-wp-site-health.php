@@ -167,17 +167,7 @@ class WP_Site_Health {
 	 * @since 5.4.0
 	 *
 	 * @param callable $callback
-	 * @return array{
-	 *     label: string,
-	 *     status: 'good'|'recommended'|'critical',
-	 *     badge: array{
-	 *         label: string,
-	 *         color: string,
-	 *     },
-	 *     description: string,
-	 *     actions: string,
-	 *     test: string,
-	 * }
+	 * @return mixed|void
 	 */
 	private function perform_test( $callback ) {
 		/**

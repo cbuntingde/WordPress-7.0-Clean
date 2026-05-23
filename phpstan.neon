@@ -1,0 +1,14 @@
+parameters:
+    level: 0
+    paths:
+        - wp-admin
+        - wp-includes
+
+    excludePaths:
+        - vendor
+        - wp-includes/blocks/*
+        - wp-includes/deprecated.php (?)
+        - wp-includes/rss.php (?)
+        - wp-includes/class-IXR.php (?)
+        - wp-includes/IXR (?)
+        - wp-includes/taxonomy.php (?)

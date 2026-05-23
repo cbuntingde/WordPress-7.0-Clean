@@ -4267,7 +4267,7 @@ class WP_Theme_JSON {
 	 *                   generated in the constructor and merge methods instead
 	 *                   of manually after instantiation.
 	 *
-	 * @return void
+	 * @return null|void
 	 */
 	public function set_spacing_sizes() {
 		_deprecated_function( __METHOD__, '6.6.0' );
@@ -4296,12 +4296,12 @@ class WP_Theme_JSON {
 					E_USER_NOTICE
 				);
 			}
-			return;
+			return null;
 		}
 
 		// If theme authors want to prevent the generation of the core spacing scale they can set their theme.json spacingScale.steps to 0.
 		if ( 0 === $spacing_scale['steps'] ) {
-			return;
+			return null;
 		}
 
 		$spacing_sizes = static::compute_spacing_sizes( $spacing_scale );

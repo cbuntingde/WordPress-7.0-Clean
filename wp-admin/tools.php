@@ -62,38 +62,148 @@ require_once ABSPATH . 'wp-admin/admin-header.php';
 ?>
 <div class="wrap">
 <h1><?php echo esc_html( $title ); ?></h1>
-<?php
 
+<div class="tools-cards">
+<?php
 if ( current_user_can( 'import' ) ) :
-	$cats = get_taxonomy( 'category' );
-	$tags = get_taxonomy( 'post_tag' );
-	if ( current_user_can( $cats->cap->manage_terms ) || current_user_can( $tags->cap->manage_terms ) ) :
-		?>
-		<div class="card">
-			<h2 class="title"><?php _e( 'Categories and Tags Converter' ); ?></h2>
-			<p>
-			<?php
-				printf(
-					/* translators: %s: URL to Import screen. */
-					__( 'If you want to convert your categories to tags (or vice versa), use the <a href="%s">Categories and Tags Converter</a> available from the Import screen.' ),
-					'import.php'
-				);
-			?>
-			</p>
-		</div>
+	?>
+	<div class="card">
+		<h2 class="title"><?php _e( 'Import' ); ?></h2>
+		<p>
 		<?php
-	endif;
+			printf(
+				__( 'Run the <a href="%s">Import</a> screen to import content from other platforms and formats.' ),
+				admin_url( 'import.php' )
+			);
+		?>
+		</p>
+	</div>
+	<?php
 endif;
 
+if ( current_user_can( 'export' ) ) :
+	?>
+	<div class="card">
+		<h2 class="title"><?php _e( 'Export' ); ?></h2>
+		<p>
+		<?php
+			printf(
+				__( 'Run the <a href="%s">Export</a> screen to export your content to portable formats.' ),
+				admin_url( 'export.php' )
+			);
+		?>
+		</p>
+	</div>
+	<?php
+endif;
+
+if ( current_user_can( 'view_site_health_checks' ) ) :
+	?>
+	<div class="card">
+		<h2 class="title"><?php _e( 'Site Health' ); ?></h2>
+		<p>
+		<?php
+			printf(
+				__( 'Run the <a href="%s">Site Health</a> screen to review performance and configuration status.' ),
+				admin_url( 'site-health.php' )
+			);
+		?>
+		</p>
+	</div>
+	<?php
+endif;
+
+if ( current_user_can( 'export_others_personal_data' ) ) :
+	?>
+	<div class="card">
+		<h2 class="title"><?php _e( 'Export Personal Data' ); ?></h2>
+		<p>
+		<?php
+			printf(
+				__( 'Run the <a href="%s">Export Personal Data</a> screen to export user data for privacy compliance.' ),
+				admin_url( 'export-personal-data.php' )
+			);
+		?>
+		</p>
+	</div>
+	<?php
+endif;
+
+if ( current_user_can( 'erase_others_personal_data' ) ) :
+	?>
+	<div class="card">
+		<h2 class="title"><?php _e( 'Erase Personal Data' ); ?></h2>
+		<p>
+		<?php
+			printf(
+				__( 'Run the <a href="%s">Erase Personal Data</a> screen to remove user data upon request.' ),
+				admin_url( 'erase-personal-data.php' )
+			);
+		?>
+		</p>
+	</div>
+	<?php
+endif;
+
+if ( current_user_can( 'delete_site' ) ) :
+	?>
+	<div class="card">
+		<h2 class="title"><?php _e( 'Delete Site' ); ?></h2>
+		<p>
+		<?php
+			printf(
+				__( 'Run the <a href="%s">Delete Site</a> screen to permanently delete this network.' ),
+				admin_url( 'ms-delete-site.php' )
+			);
+		?>
+		</p>
+	</div>
+	<?php
+endif;
+
+if ( current_user_can( 'setup_network' ) ) :
+	?>
+	<div class="card">
+		<h2 class="title"><?php _e( 'Network Setup' ); ?></h2>
+		<p>
+		<?php
+			printf(
+				__( 'Run the <a href="%s">Network Setup</a> screen to configure multisite network settings.' ),
+				admin_url( 'network.php' )
+			);
+		?>
+		</p>
+	</div>
+	<?php
+endif;
+
+$cats = get_taxonomy( 'category' );
+$tags = get_taxonomy( 'post_tag' );
+if ( current_user_can( $cats->cap->manage_terms ) || current_user_can( $tags->cap->manage_terms ) ) :
+	?>
+	<div class="card">
+		<h2 class="title"><?php _e( 'Categories and Tags Converter' ); ?></h2>
+		<p>
+		<?php
+			printf(
+				__( 'Run the <a href="%s">Categories and Tags Converter</a> available from the Import screen.' ),
+				admin_url( 'import.php' )
+			);
+		?>
+		</p>
+	</div>
+	<?php
+endif;
+?>
+
+</div>
+
+<?php
 /**
  * Fires at the end of the Tools Administration screen.
  *
  * @since 2.8.0
  */
 do_action( 'tool_box' );
-
-?>
-</div>
-<?php
 
 require_once ABSPATH . 'wp-admin/admin-footer.php';

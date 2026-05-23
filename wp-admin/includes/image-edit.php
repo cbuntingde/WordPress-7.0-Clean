@@ -545,9 +545,7 @@ function _rotate_image_resource( $img, $angle ) {
 		$rotated = imagerotate( $img, $angle, 0 );
 
 		if ( is_gd_image( $rotated ) ) {
-			if ( PHP_VERSION_ID < 80000 ) { // imagedestroy() has no effect as of PHP 8.0.
-				imagedestroy( $img );
-			}
+			imagedestroy( $img );
 
 			$img = $rotated;
 		}
@@ -583,9 +581,7 @@ function _flip_image_resource( $img, $horz, $vert ) {
 		$sh = $horz ? -$h : $h;
 
 		if ( imagecopyresampled( $dst, $img, 0, 0, $sx, $sy, $w, $h, $sw, $sh ) ) {
-			if ( PHP_VERSION_ID < 80000 ) { // imagedestroy() has no effect as of PHP 8.0.
-				imagedestroy( $img );
-			}
+			imagedestroy( $img );
 
 			$img = $dst;
 		}
@@ -612,12 +608,10 @@ function _crop_image_resource( $img, $x, $y, $w, $h ) {
 
 	if ( is_gd_image( $dst ) ) {
 		if ( imagecopy( $dst, $img, 0, 0, $x, $y, $w, $h ) ) {
-			if ( PHP_VERSION_ID < 80000 ) { // imagedestroy() has no effect as of PHP 8.0.
-				imagedestroy( $img );
-			}
+		imagedestroy( $img );
 
-			$img = $dst;
-		}
+		$img = $dst;
+	}
 	}
 
 	return $img;

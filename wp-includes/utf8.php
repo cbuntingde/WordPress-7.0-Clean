@@ -134,7 +134,7 @@ else :
 	}
 endif;
 
-if ( _wp_can_use_pcre_u() ) :
+if ( true ) :
 	/**
 	 * Returns whether the given string contains Unicode noncharacters.
 	 *

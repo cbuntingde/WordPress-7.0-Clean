@@ -240,7 +240,7 @@ require ABSPATH . WPINC . '/bookmark.php';
 require ABSPATH . WPINC . '/bookmark-template.php';
 require ABSPATH . WPINC . '/kses.php';
 require ABSPATH . WPINC . '/cron.php';
-require ABSPATH . WPINC . '/deprecated.php';
+
 require ABSPATH . WPINC . '/script-loader.php';
 if ( file_exists( ABSPATH . WPINC . '/build/routes.php' ) ) {
 	require ABSPATH . WPINC . '/build/routes.php';
@@ -480,7 +480,7 @@ WordPress\AiClient\AiClient::setEventDispatcher( new WP_AI_Client_Event_Dispatch
 if ( is_multisite() ) {
 	require ABSPATH . WPINC . '/ms-functions.php';
 	require ABSPATH . WPINC . '/ms-default-filters.php';
-	require ABSPATH . WPINC . '/ms-deprecated.php';
+	
 }
 
 // Define constants that rely on the API to obtain the default value.
@@ -602,7 +602,6 @@ unset( $plugin, $_wp_plugin_file, $plugin_data, $textdomain );
 
 // Load pluggable functions.
 require ABSPATH . WPINC . '/pluggable.php';
-require ABSPATH . WPINC . '/pluggable-deprecated.php';
 
 // Set internal encoding.
 wp_set_internal_encoding();

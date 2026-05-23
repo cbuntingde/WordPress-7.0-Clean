@@ -759,55 +759,6 @@ function is_serialized_string( $data ) {
 	}
 }
 
-/**
- * Retrieves post title from XML-RPC XML.
- *
- * If the `title` element is not found in the XML, the default post title
- * from the `$post_default_title` global will be used instead.
- *
- * @since 0.71
- *
- * @global string $post_default_title Default XML-RPC post title.
- *
- * @param string $content XML-RPC XML Request content.
- * @return string Post title.
- */
-function xmlrpc_getposttitle( $content ) {
-	global $post_default_title;
-	if ( preg_match( '/<title>(.+?)<\/title>/is', $content, $matchtitle ) ) {
-		$post_title = $matchtitle[1];
-	} else {
-		$post_title = $post_default_title;
-	}
-	return $post_title;
-}
-
-/**
- * Retrieves the post category or categories from XML-RPC XML.
- *
- * If the `category` element is not found in the XML, the default post category
- * from the `$post_default_category` global will be used instead.
- * The return type will then be a string.
- *
- * If the `category` element is found, the return type will be an array.
- *
- * @since 0.71
- *
- * @global string $post_default_category Default XML-RPC post category.
- *
- * @param string $content XML-RPC XML Request content.
- * @return string[]|string An array of category names or default category name.
- */
-function xmlrpc_getpostcategory( $content ) {
-	global $post_default_category;
-	if ( preg_match( '/<category>(.+?)<\/category>/is', $content, $matchcat ) ) {
-		$post_category = trim( $matchcat[1], ',' );
-		$post_category = explode( ',', $post_category );
-	} else {
-		$post_category = $post_default_category;
-	}
-	return $post_category;
-}
 
 /**
  * XML-RPC XML content without title and category elements.
@@ -825,7 +776,6 @@ function xmlrpc_removepostdata( $content ) {
 }
 
 /**
- * Uses RegEx to extract URLs from arbitrary content.
  *
  * @since 3.7.0
  * @since 6.0.0 Fixes support for HTML entities (Trac 30580).
@@ -3004,7 +2954,7 @@ function wp_upload_bits( $name, $deprecated, $bits, $time = null ) {
  * @since 2.5.0
  *
  * @param string $ext The extension to search.
- * @return string|null The file type, example: audio, video, document, spreadsheet, etc.
+ * @return string|void The file type, example: audio, video, document, spreadsheet, etc.
  */
 function wp_ext2type( $ext ) {
 	$ext = strtolower( $ext );
@@ -3015,7 +2965,6 @@ function wp_ext2type( $ext ) {
 			return $type;
 		}
 	}
-	return null;
 }
 
 /**
@@ -3185,9 +3134,7 @@ function wp_check_filetype_and_ext( $file, $filename, $mimes = null ) {
 		$finfo     = finfo_open( FILEINFO_MIME_TYPE );
 		$real_mime = finfo_file( $finfo, $file );
 
-		if ( PHP_VERSION_ID < 80100 ) { // finfo_close() has no effect as of PHP 8.1.
-			finfo_close( $finfo );
-		}
+		finfo_close( $finfo );
 
 		$google_docs_types = array(
 			'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
@@ -3413,15 +3360,13 @@ function wp_get_image_mime( $file ) {
 				 * HEIC/HEIF images and image sequences/animations may have other strings here
 				 * like mif1, msf1, etc. For now fall back to using finfo_file() to detect these.
 				 */
-				if ( extension_loaded( 'fileinfo' ) ) {
-					$fileinfo  = finfo_open( FILEINFO_MIME_TYPE );
-					$mime_type = finfo_file( $fileinfo, $file );
+if ( extension_loaded( 'fileinfo' ) ) {
+				$fileinfo  = finfo_open( FILEINFO_MIME_TYPE );
+				$mime_type = finfo_file( $fileinfo, $file );
 
-					if ( PHP_VERSION_ID < 80100 ) { // finfo_close() has no effect as of PHP 8.1.
-						finfo_close( $fileinfo );
-					}
+				finfo_close( $fileinfo );
 
-					if ( wp_is_heic_image_mime_type( $mime_type ) ) {
+				if ( wp_is_heic_image_mime_type( $mime_type ) ) {
 						$mime = $mime_type;
 					}
 				}
@@ -3775,9 +3720,9 @@ function wp_nonce_ays( $action ) {
  *                                  is a WP_Error.
  *     @type bool   $exit           Whether to exit the process after completion. Default true.
  * }
- * @return void Never returns if `$args['exit']` is true (the default), otherwise returns void.
+ * @return never|void Returns void if `$args['exit']` is false, otherwise exits.
  *
- * @phpstan-return ( $args is array{exit: false} ? void : never )
+ * @phpstan-return ( $args['exit'] is false ? void : never )
  */
 function wp_die( $message = '', $title = '', $args = array() ) {
 	global $wp_query;
@@ -3816,15 +3761,6 @@ function wp_die( $message = '', $title = '', $args = array() ) {
 		 * @param callable $callback Callback function name.
 		 */
 		$callback = apply_filters( 'wp_die_jsonp_handler', '_jsonp_wp_die_handler' );
-	} elseif ( defined( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST ) {
-		/**
-		 * Filters the callback for killing WordPress execution for XML-RPC requests.
-		 *
-		 * @since 3.4.0
-		 *
-		 * @param callable $callback Callback function name.
-		 */
-		$callback = apply_filters( 'wp_die_xmlrpc_handler', '_xmlrpc_wp_die_handler' );
 	} elseif ( wp_is_xml_request()
 		|| isset( $wp_query ) &&
 			( function_exists( 'is_feed' ) && is_feed()
@@ -4185,37 +4121,7 @@ function _jsonp_wp_die_handler( $message, $title = '', $args = array() ) {
 	}
 }
 
-/**
- * Kills WordPress execution and displays XML response with an error message.
- *
- * This is the handler for wp_die() when processing XML-RPC requests.
- *
- * @since 3.2.0
- * @access private
- *
- * @global wp_xmlrpc_server $wp_xmlrpc_server
- *
- * @param string       $message Error message.
- * @param string       $title   Optional. Error title. Default empty string.
- * @param string|array $args    Optional. Arguments to control behavior. Default empty array.
- */
-function _xmlrpc_wp_die_handler( $message, $title = '', $args = array() ) {
-	global $wp_xmlrpc_server;
 
-	list( $message, $title, $parsed_args ) = _wp_die_process_input( $message, $title, $args );
-
-	if ( ! headers_sent() ) {
-		nocache_headers();
-	}
-
-	if ( $wp_xmlrpc_server ) {
-		$error = new IXR_Error( $parsed_args['response'], $message );
-		$wp_xmlrpc_server->output( $error->getXml() );
-	}
-	if ( $parsed_args['exit'] ) {
-		die();
-	}
-}
 
 /**
  * Kills WordPress execution and displays XML response with an error message.
@@ -5106,7 +5012,7 @@ function _wp_array_get( $input_array, $path, $default_value = null ) {
 		}
 
 		if ( is_string( $path_element )
-			|| is_int( $path_element )
+			|| is_integer( $path_element )
 			|| null === $path_element
 		) {
 			/*
@@ -5183,7 +5089,7 @@ function _wp_array_set( &$input_array, $path, $value = null ) {
 
 	foreach ( $path as $path_element ) {
 		if (
-			! is_string( $path_element ) && ! is_int( $path_element ) &&
+			! is_string( $path_element ) && ! is_integer( $path_element ) &&
 			! is_null( $path_element )
 		) {
 			return;
@@ -5512,8 +5418,6 @@ function wp_ob_end_flush_all() {
  * @since 2.3.2
  *
  * @global wpdb $wpdb WordPress database abstraction object.
- *
- * @return never
  */
 function dead_db() {
 	global $wpdb;
@@ -7616,9 +7520,6 @@ function get_tag_regex( $tag ) {
  *     $is_utf8 = is_utf8_charset();
  *
  * @since 6.6.0
- * @since 6.6.1 A wrapper for _is_utf8_charset
- *
- * @see _is_utf8_charset
  *
  * @param string|null $blog_charset Optional. Slug representing a text character encoding, or "charset".
  *                                  E.g. "UTF-8", "Windows-1252", "ISO-8859-1", "SJIS".
@@ -7626,7 +7527,11 @@ function get_tag_regex( $tag ) {
  * @return bool Whether the slug represents the UTF-8 encoding.
  */
 function is_utf8_charset( $blog_charset = null ) {
-	return _is_utf8_charset( $blog_charset ?? get_option( 'blog_charset' ) );
+	$charset = $blog_charset ?? get_option( 'blog_charset' );
+
+	return 0 === strcasecmp( 'UTF-8', $charset )
+		|| 0 === strcasecmp( 'utf8', $charset )
+		|| 0 === strcasecmp( 'UTF8', $charset );
 }
 
 /**
@@ -8581,7 +8486,7 @@ function wp_get_default_update_php_url() {
  * @param string $after   Markup to output after the annotation. Default `</p>`.
  * @param bool   $display Whether to echo or return the markup. Default `true` for echo.
  *
- * @return string|null Update PHP page annotation if available and $display is false, null otherwise.
+ * @return string|void
  */
 function wp_update_php_annotation( $before = '<p class="description">', $after = '</p>', $display = true ) {
 	$annotation = wp_get_update_php_annotation();
@@ -8593,7 +8498,6 @@ function wp_update_php_annotation( $before = '<p class="description">', $after =
 			return $before . $annotation . $after;
 		}
 	}
-	return null;
 }
 
 /**

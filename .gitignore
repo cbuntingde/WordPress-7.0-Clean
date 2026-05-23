@@ -1,0 +1,30 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+*.swp
+*~
+
+# Local environment
+.env
+*.local
+
+# Build/artifacts
+*.phar
+node_modules/
+dist/
+
+# WordPress
+wp-config.php
+wp-content/uploads/
+*.log
+
+# Dependencies
+vendor/
+composer.phar
+.cache/
+
+# Documentation - Only README.md allowed
+*.md
+!README.md

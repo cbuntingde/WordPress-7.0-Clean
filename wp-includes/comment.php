@@ -2806,7 +2806,7 @@ function wp_defer_comment_counting( $defer = null ) {
  * @param int|null $post_id     Post ID.
  * @param bool     $do_deferred Optional. Whether to process previously deferred
  *                              post comment counts. Default false.
- * @return bool|null True on success, false on failure or if post with ID does
+ * @return bool|void True on success, false on failure or if post with ID does
  *                   not exist.
  */
 function wp_update_comment_count( $post_id, $do_deferred = false ) {
@@ -2831,7 +2831,6 @@ function wp_update_comment_count( $post_id, $do_deferred = false ) {
 	} elseif ( $post_id ) {
 		return wp_update_comment_count_now( $post_id );
 	}
-	return null;
 }
 
 /**
@@ -3314,13 +3313,13 @@ function privacy_ping_filter( $sites ) {
  * @param string $title         Title of post.
  * @param string $excerpt       Excerpt of post.
  * @param int    $post_id       Post ID.
- * @return int|false|null Database query from update.
+ * @return int|false|void Database query from update.
  */
 function trackback( $trackback_url, $title, $excerpt, $post_id ) {
 	global $wpdb;
 
 	if ( empty( $trackback_url ) ) {
-		return null;
+		return;
 	}
 
 	$options            = array();
@@ -3335,7 +3334,7 @@ function trackback( $trackback_url, $title, $excerpt, $post_id ) {
 	$response = wp_safe_remote_post( $trackback_url, $options );
 
 	if ( is_wp_error( $response ) ) {
-		return null;
+		return;
 	}
 
 	$wpdb->query( $wpdb->prepare( "UPDATE $wpdb->posts SET pinged = CONCAT(pinged, '\n', %s) WHERE ID = %d", $trackback_url, $post_id ) );
@@ -3351,8 +3350,7 @@ function trackback( $trackback_url, $title, $excerpt, $post_id ) {
  * @param string $path Path to send the ping.
  */
 function weblog_ping( $server = '', $path = '' ) {
-	require_once ABSPATH . WPINC . '/class-IXR.php';
-	require_once ABSPATH . WPINC . '/class-wp-http-ixr-client.php';
+	require_once ABSPATH . WPINC . '/class-ixr-stub.php';
 
 	// Using a timeout of 3 seconds should be enough to cover slow servers.
 	$client             = new WP_HTTP_IXR_Client( $server, ( ( ! strlen( trim( $path ) ) || ( '/' === $path ) ) ? false : $path ) );

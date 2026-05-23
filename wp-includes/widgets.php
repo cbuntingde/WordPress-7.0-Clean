@@ -446,11 +446,11 @@ function wp_register_sidebar_widget( $id, $name, $output_callback, $options = ar
  * @global array $wp_registered_widgets The registered widgets.
  *
  * @param int|string $id Widget ID.
- * @return string|null Widget description, if available.
+ * @return string|void Widget description, if available.
  */
 function wp_widget_description( $id ) {
 	if ( ! is_scalar( $id ) ) {
-		return null;
+		return;
 	}
 
 	global $wp_registered_widgets;
@@ -458,7 +458,6 @@ function wp_widget_description( $id ) {
 	if ( isset( $wp_registered_widgets[ $id ]['description'] ) ) {
 		return esc_html( $wp_registered_widgets[ $id ]['description'] );
 	}
-	return null;
 }
 
 /**
@@ -472,11 +471,11 @@ function wp_widget_description( $id ) {
  * @global array $wp_registered_sidebars The registered sidebars.
  *
  * @param string $id sidebar ID.
- * @return string|null Sidebar description, if available.
+ * @return string|void Sidebar description, if available.
  */
 function wp_sidebar_description( $id ) {
 	if ( ! is_scalar( $id ) ) {
-		return null;
+		return;
 	}
 
 	global $wp_registered_sidebars;
@@ -484,7 +483,6 @@ function wp_sidebar_description( $id ) {
 	if ( isset( $wp_registered_sidebars[ $id ]['description'] ) ) {
 		return wp_kses( $wp_registered_sidebars[ $id ]['description'], 'sidebar_description' );
 	}
-	return null;
 }
 
 /**

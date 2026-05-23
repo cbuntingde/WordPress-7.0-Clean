@@ -600,9 +600,7 @@ function prep_atom_text_construct( $data ) {
 	xml_parse( $parser, '<div>' . $data . '</div>', true );
 	$code = xml_get_error_code( $parser );
 
-	if ( PHP_VERSION_ID < 80000 ) { // xml_parser_free() has no effect as of PHP 8.0.
-		xml_parser_free( $parser );
-	}
+	xml_parser_free( $parser );
 
 	unset( $parser );
 
