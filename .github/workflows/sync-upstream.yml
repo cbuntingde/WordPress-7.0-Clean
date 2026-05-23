@@ -1,0 +1,42 @@
+name: Sync Fork with Upstream
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'  # Weekly on Sunday at midnight
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    if: github.repository != 'WordPress/WordPress'
+
+    steps:
+      - name: Checkout fork
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch upstream
+        run: |
+          git remote add upstream https://github.com/WordPress/WordPress.git
+          git fetch upstream
+
+      - name: Create merge branch
+        run: |
+          git config user.name 'GitHub Actions'
+          git config user.email 'actions@github.com'
+          git checkout -b sync-upstream-$(date +%Y%m%d) upstream/master
+          git merge master --no-edit || true
+
+      - name: Create PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { repo, owner } = context.repo;
+            const pr = await github.rest.pulls.create({
+              title: 'Sync: Merge upstream WordPress changes',
+              body: 'Automated PR to sync with upstream WordPress/master',
+              head: context.ref,
+              base: 'master',
+            });
+            console.log(`Created PR #${pr.data.number}`);

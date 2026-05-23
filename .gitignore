@@ -9,6 +9,7 @@ Thumbs.db
 # Local environment
 .env
 *.local
+.memory
 
 # Build/artifacts
 *.phar
