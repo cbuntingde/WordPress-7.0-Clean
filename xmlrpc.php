@@ -15,18 +15,10 @@ define( 'XMLRPC_REQUEST', true );
 // Discard unneeded cookies sent by some browser-embedded clients.
 $_COOKIE = array();
 
-// $HTTP_RAW_POST_DATA was deprecated in PHP 5.6 and removed in PHP 7.0.
-// phpcs:disable PHPCompatibility.Variables.RemovedPredefinedGlobalVariables.http_raw_post_dataDeprecatedRemoved
-if ( ! isset( $HTTP_RAW_POST_DATA ) ) {
-	$HTTP_RAW_POST_DATA = file_get_contents( 'php://input' );
-}
-
-// Fix for mozBlog and other cases where '<?xml' isn't on the very first line.
-$HTTP_RAW_POST_DATA = trim( $HTTP_RAW_POST_DATA );
-// phpcs:enable
-
 /** Include the bootstrap for setting up WordPress environment */
 require_once __DIR__ . '/wp-load.php';
+
+$HTTP_RAW_POST_DATA = trim( file_get_contents( 'php://input' ) );
 
 if ( isset( $_GET['rsd'] ) ) { // https://cyber.harvard.edu/blogs/gems/tech/rsd.html
 	header( 'Content-Type: text/xml; charset=' . get_option( 'blog_charset' ), true );
@@ -85,22 +77,3 @@ $wp_xmlrpc_server       = new $wp_xmlrpc_server_class();
 $wp_xmlrpc_server->serve_request();
 
 exit;
-
-/**
- * logIO() - Writes logging info to a file.
- *
- * @since 1.2.0
- * @deprecated 3.4.0 Use error_log()
- * @see error_log()
- *
- * @global int|bool $xmlrpc_logging Whether to enable XML-RPC logging.
- *
- * @param string $io  Whether input or output.
- * @param string $msg Information describing logging reason.
- */
-function logIO( $io, $msg ) {
-	_deprecated_function( __FUNCTION__, '3.4.0', 'error_log()' );
-	if ( ! empty( $GLOBALS['xmlrpc_logging'] ) ) {
-		error_log( $io . ' - ' . $msg );
-	}
-}

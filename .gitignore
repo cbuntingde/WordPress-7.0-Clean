@@ -10,6 +10,7 @@ Thumbs.db
 .env
 *.local
 .memory
+docs
 
 # Build/artifacts
 *.phar

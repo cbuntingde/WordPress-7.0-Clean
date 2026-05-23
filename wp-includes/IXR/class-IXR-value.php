@@ -6,41 +6,30 @@
  * @since 1.5.0
  */
 class IXR_Value {
-    var $data;
-    var $type;
+	public $data;
+	public $type;
 
-	/**
-	 * PHP5 constructor.
-	 */
-	function __construct( $data, $type = false )
-    {
-        $this->data = $data;
-        if (!$type) {
-            $type = $this->calculateType();
-        }
-        $this->type = $type;
-        if ($type == 'struct') {
-            // Turn all the values in the array in to new IXR_Value objects
-            foreach ($this->data as $key => $value) {
-                $this->data[$key] = new IXR_Value($value);
-            }
-        }
-        if ($type == 'array') {
-            for ($i = 0, $j = count($this->data); $i < $j; $i++) {
-                $this->data[$i] = new IXR_Value($this->data[$i]);
-            }
-        }
-    }
-
-	/**
-	 * PHP4 constructor.
-	 */
-	public function IXR_Value( $data, $type = false ) {
-		self::__construct( $data, $type );
+	public function __construct( $data, $type = false )
+	{
+		$this->data = $data;
+		if (!$type) {
+			$type = $this->calculateType();
+		}
+		$this->type = $type;
+		if ($type == 'struct') {
+			foreach ($this->data as $key => $value) {
+				$this->data[$key] = new IXR_Value($value);
+			}
+		}
+		if ($type == 'array') {
+			for ($i = 0, $j = count($this->data); $i < $j; $i++) {
+				$this->data[$i] = new IXR_Value($this->data[$i]);
+			}
+		}
 	}
 
-    function calculateType()
-    {
+	public function calculateType()
+	{
         if ($this->data === true || $this->data === false) {
             return 'boolean';
         }
@@ -76,7 +65,7 @@ class IXR_Value {
         }
     }
 
-    function getXml()
+    public function getXml()
     {
         // Return XML for this value
         switch ($this->type) {
@@ -124,7 +113,7 @@ class IXR_Value {
      * @param array $array
      * @return bool
      */
-    function isStruct($array)
+    public function isStruct($array)
     {
         $expected = 0;
         foreach ($array as $key => $value) {

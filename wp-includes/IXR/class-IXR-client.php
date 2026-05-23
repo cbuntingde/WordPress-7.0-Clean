@@ -9,23 +9,19 @@
  */
 class IXR_Client
 {
-    var $server;
-    var $port;
-    var $path;
-    var $useragent;
-    var $response;
-    var $message = false;
-    var $debug = false;
-    var $timeout;
-    var $headers = array();
+	public $server;
+	public $port;
+	public $path;
+	public $useragent;
+	public $response;
+	public $message = false;
+	public $debug = false;
+	public $timeout;
+	public $headers = array();
 
-    // Storage place for an error message
-    var $error = false;
+	public $error = false;
 
-	/**
-	 * PHP5 constructor.
-	 */
-    function __construct( $server, $path = false, $port = 80, $timeout = 15 )
+	public function __construct( $server, $path = false, $port = 80, $timeout = 15 )
     {
         if (!$path) {
             // Assume we have been given a URL instead
@@ -51,12 +47,7 @@ class IXR_Client
         $this->timeout = $timeout;
     }
 
-	/**
-	 * PHP4 constructor.
-	 */
-	public function IXR_Client( $server, $path = false, $port = 80, $timeout = 15 ) {
-		self::__construct( $server, $path, $port, $timeout );
-	}
+	
 
 	/**
 	 * @since 1.5.0
@@ -65,7 +56,7 @@ class IXR_Client
 	 *
 	 * @return bool
 	 */
-    function query( ...$args )
+    public function query( ...$args )
     {
         $method = array_shift($args);
         $request = new IXR_Request($method, $args);

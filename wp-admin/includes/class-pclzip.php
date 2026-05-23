@@ -5354,34 +5354,7 @@
   // --------------------------------------------------------------------------------
   function privDisableMagicQuotes()
   {
-    $v_result=1;
-
-	// EDIT for WordPress 5.3.0
-	// magic_quote functions are deprecated in PHP 7.4, now assuming it's always off.
-	/*
-
-    // ----- Look if function exists
-    if (   (!function_exists("get_magic_quotes_runtime"))
-	    || (!function_exists("set_magic_quotes_runtime"))) {
-      return $v_result;
-	}
-
-    // ----- Look if already done
-    if ($this->magic_quotes_status != -1) {
-      return $v_result;
-	}
-
-	// ----- Get and memorize the magic_quote value
-	$this->magic_quotes_status = @get_magic_quotes_runtime();
-
-	// ----- Disable magic_quotes
-	if ($this->magic_quotes_status == 1) {
-	  @set_magic_quotes_runtime(0);
-	}
-	*/
-
-    // ----- Return
-    return $v_result;
+    return 1;
   }
   // --------------------------------------------------------------------------------
 
@@ -5391,33 +5364,9 @@
   // Parameters :
   // Return Values :
   // --------------------------------------------------------------------------------
-  function privSwapBackMagicQuotes()
+function privSwapBackMagicQuotes()
   {
-    $v_result=1;
-
-	// EDIT for WordPress 5.3.0
-	// magic_quote functions are deprecated in PHP 7.4, now assuming it's always off.
-	/*
-
-    // ----- Look if function exists
-    if (   (!function_exists("get_magic_quotes_runtime"))
-	    || (!function_exists("set_magic_quotes_runtime"))) {
-      return $v_result;
-	}
-
-    // ----- Look if something to do
-    if ($this->magic_quotes_status != -1) {
-      return $v_result;
-	}
-
-	// ----- Swap back magic_quotes
-	if ($this->magic_quotes_status == 1) {
-  	  @set_magic_quotes_runtime($this->magic_quotes_status);
-	}
-
-	*/
-    // ----- Return
-    return $v_result;
+    return 1;
   }
   // --------------------------------------------------------------------------------
 

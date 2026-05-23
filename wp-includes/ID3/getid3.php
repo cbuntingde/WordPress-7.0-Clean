@@ -436,21 +436,7 @@ class getID3
 			$this->startup_error .= 'WARNING: php.ini contains "mbstring.func_overload = '.ini_get('mbstring.func_overload').'", getID3 cannot run with this setting (bitmask 2 (string functions) cannot be set). Recommended to disable entirely.'."\n";
 		}
 
-		// check for magic quotes in PHP < 5.4.0 (when these options were removed and getters always return false)
-		if (version_compare(PHP_VERSION, '5.4.0', '<')) {
-			// Check for magic_quotes_runtime
-			if (function_exists('get_magic_quotes_runtime')) {
-				if (get_magic_quotes_runtime()) { // @phpstan-ignore-line
-					$this->startup_error .= 'magic_quotes_runtime must be disabled before running getID3(). Surround getid3 block by set_magic_quotes_runtime(0) and set_magic_quotes_runtime(1).'."\n";
-				}
-			}
-			// Check for magic_quotes_gpc
-			if (function_exists('get_magic_quotes_gpc')) {
-				if (get_magic_quotes_gpc()) {
-					$this->startup_error .= 'magic_quotes_gpc must be disabled before running getID3(). Surround getid3 block by set_magic_quotes_gpc(0) and set_magic_quotes_gpc(1).'."\n";
-				}
-			}
-		}
+		
 
 		// Load support library
 		if (!include_once(GETID3_INCLUDEPATH.'getid3.lib.php')) {

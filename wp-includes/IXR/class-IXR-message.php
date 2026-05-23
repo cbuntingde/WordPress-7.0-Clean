@@ -9,43 +9,30 @@
  */
 class IXR_Message
 {
-    var $message     = false;
-    var $messageType = false;  // methodCall / methodResponse / fault
-    var $faultCode   = false;
-    var $faultString = false;
-    var $methodName  = '';
-    var $params      = array();
+	public $message     = false;
+	public $messageType = false;
+	public $faultCode   = false;
+	public $faultString = false;
+	public $methodName  = '';
+	public $params      = array();
 
-    // Current variable stacks
-    var $_arraystructs = array();   // The stack used to keep track of the current array/struct
-    var $_arraystructstypes = array(); // Stack keeping track of if things are structs or array
-    var $_currentStructName = array();  // A stack as well
-    var $_param;
-    var $_value;
-    var $_currentTag;
-    var $_currentTagContents;
-    // The XML parser
-    var $_parser;
+	public $_arraystructs = array();
+	public $_arraystructstypes = array();
+	public $_currentStructName = array();
+	public $_param;
+	public $_value;
+	public $_currentTag;
+	public $_currentTagContents;
+	public $_parser;
 
-	/**
-	 * PHP5 constructor.
-	 */
-    function __construct( $message )
-    {
-        $this->message =& $message;
-    }
-
-	/**
-	 * PHP4 constructor.
-	 */
-	public function IXR_Message( $message ) {
-		self::__construct( $message );
+	public function __construct( $message )
+	{
+		$this->message =& $message;
 	}
 
-    function parse()
-    {
-        if ( ! function_exists( 'xml_parser_create' ) ) {
-            trigger_error( __( "PHP's XML extension is not available. Please contact your hosting provider to enable PHP's XML extension." ) );
+	public function parse()
+	{
+		if ( ! function_exists( 'xml_parser_create' ) ) {
             return false;
         }
 
@@ -146,7 +133,7 @@ class IXR_Message
         return true;
     }
 
-    function tag_open($parser, $tag, $attr)
+    public function tag_open($parser, $tag, $attr)
     {
         $this->_currentTagContents = '';
         $this->_currentTag = $tag;
@@ -168,12 +155,12 @@ class IXR_Message
         }
     }
 
-    function cdata($parser, $cdata)
+    public function cdata($parser, $cdata)
     {
         $this->_currentTagContents .= $cdata;
     }
 
-    function tag_close($parser, $tag)
+    public function tag_close($parser, $tag)
     {
         $valueFlag = false;
         switch($tag) {

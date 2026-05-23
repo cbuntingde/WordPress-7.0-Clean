@@ -7,20 +7,21 @@
  */
 
 // Confidence check.
-if ( false ) {
+if ( PHP_VERSION_ID < 80100 ) {
 	?>
 <!DOCTYPE html>
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-	<title>Error: PHP is not running</title>
+	<title>Error: PHP upgrade required</title>
 </head>
 <body class="wp-core-ui admin-color-modern">
-	<h1>Error: PHP is not running</h1>
-	<p>WordPress requires that your web server is running PHP. Your server does not have PHP installed, or PHP is turned off.</p>
+	<h1>Error: PHP upgrade required</h1>
+	<p>WordPress 7.0 requires PHP 8.1 or higher. Your server is running PHP <?php echo PHP_VERSION; ?>.</p>
 </body>
 </html>
 	<?php
+	exit;
 }
 
 /**
