@@ -4,6 +4,15 @@ WordPress has accumulated decades of backward compatibility code to support PHP 
 
 This project strips all of that away by requiring PHP 8.5+ and MySQL 8.0.0+. The result is cleaner code, fewer files to audit, faster execution, and a codebase that takes advantage of modern PHP features without conditional logic everywhere.
 
+## Important: Custom Versioning
+
+**This is a forked WordPress release.** Version numbers diverge from official WordPress.
+
+- **Official WP 7.0** → This project's **7.0.1+**
+- Updates come from **GitHub releases**, not wordpress.org
+- Use the built-in **Settings → Core Updater** page (mu-plugin) to check for updates
+- Do not rely on WordPress.org for updates — they won't work
+
 ## Latest Changes
 
 - Added GitHub core update checker mu-plugin to query releases directly from GitHub
