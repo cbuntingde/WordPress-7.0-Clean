@@ -6,7 +6,7 @@ This project strips all of that away by requiring PHP 8.5+ and MySQL 8.0.0+. The
 
 ## Latest Changes
 
-- Added disable-core-update mu-plugin to prevent automatic WordPress core updates
+- Added GitHub core update checker mu-plugin to query releases directly from GitHub
 - Removed rss-functions.php (broken reference to missing rss.php)
 - Simplified compat.php to sodium_compat loader only
 - Replaced utf8_encode/utf8_decode with mb_convert_encoding()
@@ -135,20 +135,23 @@ Access at http://localhost:8090 (admin / admin123)
 
 ## Core Update Protection
 
-This repo includes a must-use plugin that disables automatic WordPress core updates. This prevents accidental core overwrites that would lose the massive changes in this repo.
+This repo includes a must-use plugin (`wp-content/mu-plugins/github-core-updater.php`) that checks GitHub releases for updates instead of wordpress.org.
 
 **How it works:**
-- `wp-content/mu-plugins/disable-core-updates.php` loads automatically on every request
-- Defines `WP_AUTO_UPDATE_CORE = false`
-- Adds `auto_update_core` filter returning false
+- Queries `https://api.github.com/repos/cbuntingde/WordPress-7.0-Clean/releases/latest`
+- Compares the remote version tag with local `$wp_version`
+- Shows an admin notice when a new release is available
+- Provides a direct download link to the zip
 
-**For maximum protection**, also add this to your `wp-config.php`:
+**No automatic updates** — The plugin only notifies you. Updates must be applied manually by downloading the zip and extracting it over your installation.
+
+This gives you full control while still being notified of new releases.
+
+**Also recommended**, add this to your `wp-config.php` for defense in depth:
 
 ```php
 define( 'WP_AUTO_UPDATE_CORE', false );
 ```
-
-Plugins and themes can still be updated — only core updates are blocked.
 
 ## License
 
