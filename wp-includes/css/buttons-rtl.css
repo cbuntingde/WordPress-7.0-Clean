@@ -29,16 +29,16 @@ an actual class (e.g. `.hover` for `:hover`).
 
 TABLE OF CONTENTS:
 ------------------
- 1.0 - Button Layouts
- 2.0 - Default Button Style
- 3.0 - Primary Button Style
- 4.0 - Button Groups
- 5.0 - Responsive Button Styles
+1.0 - Button Layouts
+2.0 - Default Button Style
+3.0 - Primary Button Style
+4.0 - Button Groups
+5.0 - Responsive Button Styles
 
 ---------------------------------------------------------------------------- */
 
 /* ----------------------------------------------------------------------------
-  1.0 - Button Layouts
+	1.0 - Button Layouts
 ---------------------------------------------------------------------------- */
 
 .wp-core-ui .button,
@@ -143,7 +143,7 @@ TABLE OF CONTENTS:
 }
 
 /* ----------------------------------------------------------------------------
-  2.0 - Default Button Style
+	2.0 - Default Button Style
 ---------------------------------------------------------------------------- */
 
 .wp-core-ui .button,
@@ -272,7 +272,7 @@ TABLE OF CONTENTS:
 
 
 /* ----------------------------------------------------------------------------
-  3.0 - Primary Button Style
+	3.0 - Primary Button Style
 ---------------------------------------------------------------------------- */
 
 .wp-core-ui .button-primary {
@@ -328,7 +328,7 @@ TABLE OF CONTENTS:
 }
 
 /* ----------------------------------------------------------------------------
-  4.0 - Button Groups
+	4.0 - Button Groups
 ---------------------------------------------------------------------------- */
 
 .wp-core-ui .button-group {
@@ -374,7 +374,7 @@ TABLE OF CONTENTS:
 }
 
 /* ----------------------------------------------------------------------------
-  5.0 - Responsive Button Styles
+	5.0 - Responsive Button Styles
 ---------------------------------------------------------------------------- */
 
 @media screen and (max-width: 782px) {

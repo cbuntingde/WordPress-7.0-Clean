@@ -44,6 +44,6 @@
  * These variables do not appear to be used anywhere else.
  */
 .wp-block-math__textarea-control textarea {
-  font-family: Menlo, Consolas, monaco, monospace;
-  direction: ltr;
+	font-family: Menlo, Consolas, monaco, monospace;
+	direction: ltr;
 }

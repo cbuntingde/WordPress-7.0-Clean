@@ -148,8 +148,8 @@ final class WP_Block_Templates_Registry {
 	 *
 	 * @since 6.7.0
 	 *
-	 * @param array  $query {
-	 *     Arguments to retrieve templates. Optional, empty by default.
+	 * @param array $query {
+	 *    Arguments to retrieve templates. Optional, empty by default.
 	 *
 	 *     @type string[] $slug__in     List of slugs to include.
 	 *     @type string[] $slug__not_in List of slugs to skip.

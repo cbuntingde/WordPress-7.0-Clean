@@ -266,6 +266,7 @@ function wp_apply_typography_support( $block_type, $block_attributes ) {
  * * It is necessary to parse older blocks whose typography styles contain presets.
  * * It mostly replaces the deprecated `wp_typography_get_css_variable_inline_style()`,
  *   but skips compiling a CSS declaration as the style engine takes over this role.
+ *
  * @link https://github.com/wordpress/gutenberg/pull/27555
  *
  * @since 6.1.0
@@ -548,8 +549,6 @@ function wp_get_computed_fluid_typography_value( $args = array() ) {
  *                             Default is false.
  * @return string|null Font-size value or null if a size is not passed in $preset.
  */
-
-
 function wp_get_typography_font_size_value( $preset, $settings = array() ) {
 	if ( ! isset( $preset['size'] ) ) {
 		return null;

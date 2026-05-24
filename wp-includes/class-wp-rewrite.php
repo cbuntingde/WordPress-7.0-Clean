@@ -1695,12 +1695,10 @@ class WP_Rewrite {
 		// "external" = it doesn't correspond to index.php.
 		if ( $external ) {
 			$this->add_external_rule( $regex, $query );
-		} else {
-			if ( 'bottom' === $after ) {
+		} elseif ( 'bottom' === $after ) {
 				$this->extra_rules = array_merge( $this->extra_rules, array( $regex => $query ) );
-			} else {
-				$this->extra_rules_top = array_merge( $this->extra_rules_top, array( $regex => $query ) );
-			}
+		} else {
+			$this->extra_rules_top = array_merge( $this->extra_rules_top, array( $regex => $query ) );
 		}
 	}
 

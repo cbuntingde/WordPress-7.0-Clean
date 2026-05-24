@@ -175,14 +175,14 @@ function get_image_send_to_editor( $id, $caption, $title, $align, $url = '', $re
  *
  * @since 2.6.0
  *
- * @param string  $html    The image HTML markup to send.
- * @param int     $id      Image attachment ID.
- * @param string  $caption Image caption.
- * @param string  $title   Image title attribute (not used).
- * @param string  $align   Image CSS alignment property.
- * @param string  $url     Image source URL (not used).
- * @param string  $size    Image size (not used).
- * @param string  $alt     Image `alt` attribute (not used).
+ * @param string $html    The image HTML markup to send.
+ * @param int    $id      Image attachment ID.
+ * @param string $caption Image caption.
+ * @param string $title   Image title attribute (not used).
+ * @param string $align   Image CSS alignment property.
+ * @param string $url     Image source URL (not used).
+ * @param string $size    Image size (not used).
+ * @param string $alt     Image `alt` attribute (not used).
  * @return string The image HTML markup with caption shortcode.
  */
 function image_add_caption( $html, $id, $caption, $title, $align, $url, $size, $alt = '' ) {
@@ -1369,9 +1369,9 @@ function media_post_single_attachment_fields_to_edit( $form_fields, $post ) {
  *
  * @since 2.5.0
  *
- * @param string  $html
- * @param int     $attachment_id
- * @param array   $attachment
+ * @param string $html
+ * @param int    $attachment_id
+ * @param array  $attachment
  * @return string HTML markup for the media element.
  */
 function image_media_send_to_editor( $html, $attachment_id, $attachment ) {
@@ -1561,11 +1561,9 @@ function get_media_items( $post_id, $errors ) {
 				)
 			);
 		}
-	} else {
-		if ( is_array( $GLOBALS['wp_the_query']->posts ) ) {
-			foreach ( $GLOBALS['wp_the_query']->posts as $attachment ) {
-				$attachments[ $attachment->ID ] = $attachment;
-			}
+	} elseif ( is_array( $GLOBALS['wp_the_query']->posts ) ) {
+		foreach ( $GLOBALS['wp_the_query']->posts as $attachment ) {
+			$attachments[ $attachment->ID ] = $attachment;
 		}
 	}
 
@@ -2417,9 +2415,9 @@ function media_upload_type_form( $type = 'file', $errors = null, $id = null ) {
  *
  * @since 2.7.0
  *
- * @param string  $type
- * @param object  $errors
- * @param int     $id
+ * @param string $type
+ * @param object $errors
+ * @param int    $id
  */
 function media_upload_type_url_form( $type = null, $errors = null, $id = null ) {
 	if ( null === $type ) {

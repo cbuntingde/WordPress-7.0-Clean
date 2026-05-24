@@ -175,14 +175,12 @@ function get_blog_details( $fields = null, $get_all = true ) {
 		} else {
 			return false;
 		}
-	} else {
-		if ( ! $fields ) {
+	} elseif ( ! $fields ) {
 			$blog_id = get_current_blog_id();
-		} elseif ( ! is_numeric( $fields ) ) {
-			$blog_id = get_id_from_blogname( $fields );
-		} else {
-			$blog_id = $fields;
-		}
+	} elseif ( ! is_numeric( $fields ) ) {
+		$blog_id = get_id_from_blogname( $fields );
+	} else {
+		$blog_id = $fields;
 	}
 
 	$blog_id = (int) $blog_id;

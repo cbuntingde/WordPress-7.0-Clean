@@ -357,12 +357,10 @@ class WP_Text_Diff_Renderer_Table extends Text_Diff_Renderer {
 				$r .= $this->_added( array( $final_line ), false );
 			} elseif ( $final_rows[ $row ] < 0 ) { // Final is blank. This is really a deleted row.
 				$r .= $this->_deleted( array( $orig_line ), false );
-			} else { // A true changed row.
-				if ( $this->_show_split_view ) {
+			} elseif ( $this->_show_split_view ) { // A true changed row.
 					$r .= '<tr>' . $this->deletedLine( $orig_line ) . $this->addedLine( $final_line ) . "</tr>\n";
-				} else {
-					$r .= '<tr>' . $this->deletedLine( $orig_line ) . '</tr><tr>' . $this->addedLine( $final_line ) . "</tr>\n";
-				}
+			} else {
+				$r .= '<tr>' . $this->deletedLine( $orig_line ) . '</tr><tr>' . $this->addedLine( $final_line ) . "</tr>\n";
 			}
 		}
 

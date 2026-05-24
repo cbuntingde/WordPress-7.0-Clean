@@ -1737,7 +1737,7 @@ class WP_List_Table {
 
 	/**
 	 * @param object|array $item
-	 * @param string $column_name
+	 * @param string       $column_name
 	 */
 	protected function column_default( $item, $column_name ) {}
 

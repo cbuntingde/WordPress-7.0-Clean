@@ -2201,7 +2201,7 @@ p.customize-section-description {
 }
 
 /* Unstick the filter bar on short windows/screens. This breakpoint is based on the
-   current length of .org feature filters assuming translations do not wrap lines. */
+	current length of .org feature filters assuming translations do not wrap lines. */
 @media screen and (max-height: 540px), screen and (max-width: 1018px) {
 	.customize-preview-header.themes-filter-bar {
 		position: relative;
@@ -2367,7 +2367,7 @@ p.customize-section-description {
 }
 
 /* Avoid a z-index war by resetting elements that should be under the overlay.
-   This is likely required because of the way that sections and panels are positioned. */
+	This is likely required because of the way that sections and panels are positioned. */
 .wp-customizer.modal-open #customize-header-actions,
 .wp-customizer.modal-open .control-panel-themes .filter-themes-count,
 .wp-customizer.modal-open .control-panel-themes .customize-themes-section-title.selected:after {
@@ -2936,7 +2936,7 @@ body.adding-widget .add-new-widget:before,
 @media screen and (max-width: 640px) {
 
 	/* when the sidebar is collapsed and switching to responsive view,
-	   bring it back see ticket #35220 */
+		bring it back see ticket #35220 */
 	.wp-full-overlay.collapsed #customize-controls {
 		margin-right: 0;
 	}

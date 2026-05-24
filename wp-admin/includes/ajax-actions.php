@@ -2079,10 +2079,8 @@ function wp_ajax_inline_save() {
 		if ( ! current_user_can( 'edit_page', $post_id ) ) {
 			wp_die( __( 'Sorry, you are not allowed to edit this page.' ) );
 		}
-	} else {
-		if ( ! current_user_can( 'edit_post', $post_id ) ) {
+	} elseif ( ! current_user_can( 'edit_post', $post_id ) ) {
 			wp_die( __( 'Sorry, you are not allowed to edit this post.' ) );
-		}
 	}
 
 	$last = wp_check_post_lock( $post_id );
@@ -2969,7 +2967,7 @@ function wp_ajax_dismiss_wp_pointer() {
 		wp_die( 0 );
 	}
 
-	//  check_ajax_referer( 'dismiss-pointer_' . $pointer );
+	// check_ajax_referer( 'dismiss-pointer_' . $pointer );
 
 	$dismissed = array_filter( explode( ',', (string) get_user_meta( get_current_user_id(), 'dismissed_wp_pointers', true ) ) );
 

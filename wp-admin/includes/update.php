@@ -70,11 +70,9 @@ function get_core_updates( $options = array() ) {
 				$update->dismissed = true;
 				$result[]          = $update;
 			}
-		} else {
-			if ( $options['available'] ) {
+		} elseif ( $options['available'] ) {
 				$update->dismissed = false;
 				$result[]          = $update;
-			}
 		}
 	}
 
@@ -546,8 +544,7 @@ function wp_plugin_update_row( $file, $plugin_data ) {
 				),
 				esc_attr( $response->new_version )
 			);
-		} else {
-			if ( $compatible_php ) {
+		} elseif ( $compatible_php ) {
 				printf(
 					/* translators: 1: Plugin name, 2: Details URL, 3: Additional link attributes, 4: Version number, 5: Update URL, 6: Additional link attributes. */
 					__( 'There is a new version of %1$s available. <a href="%2$s" %3$s>View version %4$s details</a> or <a href="%5$s" %6$s>update now</a>.' ),
@@ -566,22 +563,21 @@ function wp_plugin_update_row( $file, $plugin_data ) {
 						esc_attr( sprintf( _x( 'Update %s now', 'plugin' ), $plugin_name ) )
 					)
 				);
-			} else {
-				printf(
-					/* translators: 1: Plugin name, 2: Details URL, 3: Additional link attributes, 4: Version number 5: URL to Update PHP page. */
-					__( 'There is a new version of %1$s available, but it does not work with your version of PHP. <a href="%2$s" %3$s>View version %4$s details</a> or <a href="%5$s">learn more about updating PHP</a>.' ),
-					$plugin_name,
-					esc_url( $details_url ),
-					sprintf(
-						'class="thickbox open-plugin-details-modal" aria-label="%s"',
-						/* translators: 1: Plugin name, 2: Version number. */
-						esc_attr( sprintf( __( 'View %1$s version %2$s details' ), $plugin_name, $response->new_version ) )
-					),
-					esc_attr( $response->new_version ),
-					esc_url( wp_get_update_php_url() )
-				);
-				wp_update_php_annotation( '<br><em>', '</em>' );
-			}
+		} else {
+			printf(
+				/* translators: 1: Plugin name, 2: Details URL, 3: Additional link attributes, 4: Version number 5: URL to Update PHP page. */
+				__( 'There is a new version of %1$s available, but it does not work with your version of PHP. <a href="%2$s" %3$s>View version %4$s details</a> or <a href="%5$s">learn more about updating PHP</a>.' ),
+				$plugin_name,
+				esc_url( $details_url ),
+				sprintf(
+					'class="thickbox open-plugin-details-modal" aria-label="%s"',
+					/* translators: 1: Plugin name, 2: Version number. */
+					esc_attr( sprintf( __( 'View %1$s version %2$s details' ), $plugin_name, $response->new_version ) )
+				),
+				esc_attr( $response->new_version ),
+				esc_url( wp_get_update_php_url() )
+			);
+			wp_update_php_annotation( '<br><em>', '</em>' );
 		}
 
 		/**
@@ -759,62 +755,60 @@ function wp_theme_update_row( $theme_key, $theme ) {
 				)
 			);
 		}
-	} else {
-		if ( ! $compatible_wp && ! $compatible_php ) {
+	} elseif ( ! $compatible_wp && ! $compatible_php ) {
 			printf(
 				/* translators: %s: Theme name. */
 				__( 'There is a new version of %s available, but it does not work with your versions of WordPress and PHP.' ),
 				$theme['Name']
 			);
-			if ( current_user_can( 'update_core' ) && current_user_can( 'update_php' ) ) {
-				printf(
-					/* translators: 1: URL to WordPress Updates screen, 2: URL to Update PHP page. */
-					' ' . __( '<a href="%1$s">Please update WordPress</a>, and then <a href="%2$s">learn more about updating PHP</a>.' ),
-					self_admin_url( 'update-core.php' ),
-					esc_url( wp_get_update_php_url() )
-				);
-				wp_update_php_annotation( '</p><p><em>', '</em>' );
-			} elseif ( current_user_can( 'update_core' ) ) {
-				printf(
-					/* translators: %s: URL to WordPress Updates screen. */
-					' ' . __( '<a href="%s">Please update WordPress</a>.' ),
-					self_admin_url( 'update-core.php' )
-				);
-			} elseif ( current_user_can( 'update_php' ) ) {
-				printf(
-					/* translators: %s: URL to Update PHP page. */
-					' ' . __( '<a href="%s">Learn more about updating PHP</a>.' ),
-					esc_url( wp_get_update_php_url() )
-				);
-				wp_update_php_annotation( '</p><p><em>', '</em>' );
-			}
-		} elseif ( ! $compatible_wp ) {
+		if ( current_user_can( 'update_core' ) && current_user_can( 'update_php' ) ) {
 			printf(
-				/* translators: %s: Theme name. */
-				__( 'There is a new version of %s available, but it does not work with your version of WordPress.' ),
-				$theme['Name']
+				/* translators: 1: URL to WordPress Updates screen, 2: URL to Update PHP page. */
+				' ' . __( '<a href="%1$s">Please update WordPress</a>, and then <a href="%2$s">learn more about updating PHP</a>.' ),
+				self_admin_url( 'update-core.php' ),
+				esc_url( wp_get_update_php_url() )
 			);
-			if ( current_user_can( 'update_core' ) ) {
-				printf(
-					/* translators: %s: URL to WordPress Updates screen. */
-					' ' . __( '<a href="%s">Please update WordPress</a>.' ),
-					self_admin_url( 'update-core.php' )
-				);
-			}
-		} elseif ( ! $compatible_php ) {
+			wp_update_php_annotation( '</p><p><em>', '</em>' );
+		} elseif ( current_user_can( 'update_core' ) ) {
 			printf(
-				/* translators: %s: Theme name. */
-				__( 'There is a new version of %s available, but it does not work with your version of PHP.' ),
-				$theme['Name']
+				/* translators: %s: URL to WordPress Updates screen. */
+				' ' . __( '<a href="%s">Please update WordPress</a>.' ),
+				self_admin_url( 'update-core.php' )
 			);
-			if ( current_user_can( 'update_php' ) ) {
-				printf(
-					/* translators: %s: URL to Update PHP page. */
-					' ' . __( '<a href="%s">Learn more about updating PHP</a>.' ),
-					esc_url( wp_get_update_php_url() )
-				);
-				wp_update_php_annotation( '</p><p><em>', '</em>' );
-			}
+		} elseif ( current_user_can( 'update_php' ) ) {
+			printf(
+				/* translators: %s: URL to Update PHP page. */
+				' ' . __( '<a href="%s">Learn more about updating PHP</a>.' ),
+				esc_url( wp_get_update_php_url() )
+			);
+			wp_update_php_annotation( '</p><p><em>', '</em>' );
+		}
+	} elseif ( ! $compatible_wp ) {
+		printf(
+			/* translators: %s: Theme name. */
+			__( 'There is a new version of %s available, but it does not work with your version of WordPress.' ),
+			$theme['Name']
+		);
+		if ( current_user_can( 'update_core' ) ) {
+			printf(
+				/* translators: %s: URL to WordPress Updates screen. */
+				' ' . __( '<a href="%s">Please update WordPress</a>.' ),
+				self_admin_url( 'update-core.php' )
+			);
+		}
+	} elseif ( ! $compatible_php ) {
+		printf(
+			/* translators: %s: Theme name. */
+			__( 'There is a new version of %s available, but it does not work with your version of PHP.' ),
+			$theme['Name']
+		);
+		if ( current_user_can( 'update_php' ) ) {
+			printf(
+				/* translators: %s: URL to Update PHP page. */
+				' ' . __( '<a href="%s">Learn more about updating PHP</a>.' ),
+				esc_url( wp_get_update_php_url() )
+			);
+			wp_update_php_annotation( '</p><p><em>', '</em>' );
 		}
 	}
 

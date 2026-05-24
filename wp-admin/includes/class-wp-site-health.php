@@ -121,7 +121,7 @@ class WP_Site_Health {
 		}
 
 		if ( 'site-health' === $screen->id && ( ! isset( $_GET['tab'] ) || empty( $_GET['tab'] ) ) ) {
-			$tests = WP_Site_Health::get_tests();
+			$tests = self::get_tests();
 
 			// Don't run https test on development environments.
 			if ( $this->is_development_environment() ) {
@@ -416,31 +416,29 @@ class WP_Site_Health {
 				esc_url( network_admin_url( 'plugins.php?plugin_status=upgrade' ) ),
 				__( 'Update your plugins' )
 			);
-		} else {
-			if ( 1 === $plugins_active ) {
+		} elseif ( 1 === $plugins_active ) {
 				$result['description'] .= sprintf(
 					'<p>%s</p>',
 					__( 'Your site has 1 active plugin, and it is up to date.' )
 				);
-			} elseif ( $plugins_active > 0 ) {
-				$result['description'] .= sprintf(
-					'<p>%s</p>',
-					sprintf(
-						/* translators: %d: The number of active plugins. */
-						_n(
-							'Your site has %d active plugin, and it is up to date.',
-							'Your site has %d active plugins, and they are all up to date.',
-							$plugins_active
-						),
+		} elseif ( $plugins_active > 0 ) {
+			$result['description'] .= sprintf(
+				'<p>%s</p>',
+				sprintf(
+					/* translators: %d: The number of active plugins. */
+					_n(
+						'Your site has %d active plugin, and it is up to date.',
+						'Your site has %d active plugins, and they are all up to date.',
 						$plugins_active
-					)
-				);
-			} else {
-				$result['description'] .= sprintf(
-					'<p>%s</p>',
-					__( 'Your site does not have any active plugins.' )
-				);
-			}
+					),
+					$plugins_active
+				)
+			);
+		} else {
+			$result['description'] .= sprintf(
+				'<p>%s</p>',
+				__( 'Your site does not have any active plugins.' )
+			);
 		}
 
 		// Check if there are inactive plugins.
@@ -1517,8 +1515,7 @@ class WP_Site_Health {
 						)
 					);
 				}
-			} else {
-				if ( is_ssl() ) {
+			} elseif ( is_ssl() ) {
 					$result['description'] = sprintf(
 						'<p>%s</p>',
 						sprintf(
@@ -1528,17 +1525,16 @@ class WP_Site_Health {
 							esc_url( admin_url( 'options-general.php' ) . '#home' )
 						)
 					);
-				} else {
-					$result['description'] = sprintf(
-						'<p>%s</p>',
-						sprintf(
-							/* translators: 1: URL to Settings > General > WordPress Address, 2: URL to Settings > General > Site Address. */
-							__( 'Your <a href="%1$s">WordPress Address</a> and <a href="%2$s">Site Address</a> are not set up to use HTTPS.' ),
-							esc_url( admin_url( 'options-general.php' ) . '#siteurl' ),
-							esc_url( admin_url( 'options-general.php' ) . '#home' )
-						)
-					);
-				}
+			} else {
+				$result['description'] = sprintf(
+					'<p>%s</p>',
+					sprintf(
+						/* translators: 1: URL to Settings > General > WordPress Address, 2: URL to Settings > General > Site Address. */
+						__( 'Your <a href="%1$s">WordPress Address</a> and <a href="%2$s">Site Address</a> are not set up to use HTTPS.' ),
+						esc_url( admin_url( 'options-general.php' ) . '#siteurl' ),
+						esc_url( admin_url( 'options-general.php' ) . '#home' )
+					)
+				);
 			}
 
 			if ( wp_is_https_supported() ) {
@@ -2943,25 +2939,25 @@ class WP_Site_Health {
 					'label'             => __( 'Communication with WordPress.org' ),
 					'test'              => rest_url( 'wp-site-health/v1/tests/dotorg-communication' ),
 					'has_rest'          => true,
-					'async_direct_test' => array( WP_Site_Health::get_instance(), 'get_test_dotorg_communication' ),
+					'async_direct_test' => array( self::get_instance(), 'get_test_dotorg_communication' ),
 				),
 				'background_updates'   => array(
 					'label'             => __( 'Background updates' ),
 					'test'              => rest_url( 'wp-site-health/v1/tests/background-updates' ),
 					'has_rest'          => true,
-					'async_direct_test' => array( WP_Site_Health::get_instance(), 'get_test_background_updates' ),
+					'async_direct_test' => array( self::get_instance(), 'get_test_background_updates' ),
 				),
 				'loopback_requests'    => array(
 					'label'             => __( 'Loopback request' ),
 					'test'              => rest_url( 'wp-site-health/v1/tests/loopback-requests' ),
 					'has_rest'          => true,
-					'async_direct_test' => array( WP_Site_Health::get_instance(), 'get_test_loopback_requests' ),
+					'async_direct_test' => array( self::get_instance(), 'get_test_loopback_requests' ),
 				),
 				'https_status'         => array(
 					'label'             => __( 'HTTPS status' ),
 					'test'              => rest_url( 'wp-site-health/v1/tests/https-status' ),
 					'has_rest'          => true,
-					'async_direct_test' => array( WP_Site_Health::get_instance(), 'get_test_https_status' ),
+					'async_direct_test' => array( self::get_instance(), 'get_test_https_status' ),
 				),
 			),
 		);
@@ -2983,7 +2979,7 @@ class WP_Site_Health {
 				'label'             => __( 'Page cache' ),
 				'test'              => rest_url( 'wp-site-health/v1/tests/page-cache' ),
 				'has_rest'          => true,
-				'async_direct_test' => array( WP_Site_Health::get_instance(), 'get_test_page_cache' ),
+				'async_direct_test' => array( self::get_instance(), 'get_test_page_cache' ),
 			);
 
 			$tests['direct']['persistent_object_cache'] = array(
@@ -3354,7 +3350,7 @@ class WP_Site_Health {
 		// Bootstrap wp-admin, as WP_Cron doesn't do this for us.
 		require_once trailingslashit( ABSPATH ) . 'wp-admin/includes/admin.php';
 
-		$tests = WP_Site_Health::get_tests();
+		$tests = self::get_tests();
 
 		$results = array();
 

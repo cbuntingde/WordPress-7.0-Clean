@@ -24,12 +24,12 @@
  * @return WP_Site Current site object.
  */
 function get_dashboard_blog() {
-    _deprecated_function( __FUNCTION__, '3.1.0', 'get_site()' );
-    if ( $blog = get_site_option( 'dashboard_blog' ) ) {
-	    return get_site( $blog );
-    }
+	_deprecated_function( __FUNCTION__, '3.1.0', 'get_site()' );
+	if ( $blog = get_site_option( 'dashboard_blog' ) ) {
+		return get_site( $blog );
+	}
 
-    return get_site( get_network()->site_id );
+	return get_site( get_network()->site_id );
 }
 
 /**
@@ -66,31 +66,34 @@ function is_site_admin( $user_login = '' ) {
 
 	if ( empty( $user_login ) ) {
 		$user_id = get_current_user_id();
-		if ( !$user_id )
+		if ( ! $user_id ) {
 			return false;
+		}
 	} else {
 		$user = get_user_by( 'login', $user_login );
-		if ( ! $user->exists() )
+		if ( ! $user->exists() ) {
 			return false;
+		}
 		$user_id = $user->ID;
 	}
 
 	return is_super_admin( $user_id );
 }
 
-if ( !function_exists( 'graceful_fail' ) ) :
-/**
- * Deprecated functionality to gracefully fail.
- *
- * @since MU (3.0.0)
- * @deprecated 3.0.0 Use wp_die()
- * @see wp_die()
- */
-function graceful_fail( $message ) {
-	_deprecated_function( __FUNCTION__, '3.0.0', 'wp_die()' );
-	$message = apply_filters( 'graceful_fail', $message );
-	$message_template = apply_filters( 'graceful_fail_template',
-'<!DOCTYPE html>
+if ( ! function_exists( 'graceful_fail' ) ) :
+	/**
+	 * Deprecated functionality to gracefully fail.
+	 *
+	 * @since MU (3.0.0)
+	 * @deprecated 3.0.0 Use wp_die()
+	 * @see wp_die()
+	 */
+	function graceful_fail( $message ) {
+		_deprecated_function( __FUNCTION__, '3.0.0', 'wp_die()' );
+		$message          = apply_filters( 'graceful_fail', $message );
+		$message_template = apply_filters(
+			'graceful_fail_template',
+			'<!DOCTYPE html>
 <html><head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>Error!</title>
@@ -112,9 +115,10 @@ text-align: center;
 <body>
 <p class="message">%s</p>
 </body>
-</html>' );
-	die( sprintf( $message_template, $message ) );
-}
+</html>'
+		);
+		die( sprintf( $message_template, $message ) );
+	}
 endif;
 
 /**
@@ -128,7 +132,7 @@ endif;
  */
 function get_user_details( $username ) {
 	_deprecated_function( __FUNCTION__, '3.0.0', 'get_user_by()' );
-	return get_user_by('login', $username);
+	return get_user_by( 'login', $username );
 }
 
 /**
@@ -167,7 +171,7 @@ function is_main_blog() {
  * @param bool   $check_domain Deprecated.
  * @return string|false Valid email address on success, false on failure.
  */
-function validate_email( $email, $check_domain = true) {
+function validate_email( $email, $check_domain = true ) {
 	_deprecated_function( __FUNCTION__, '3.0.0', 'is_email()' );
 	return is_email( $email, $check_domain );
 }
@@ -193,8 +197,8 @@ function get_blog_list( $start = 0, $num = 10, $deprecated = '' ) {
 
 	$blog_list = array();
 	foreach ( (array) $blogs as $details ) {
-		$blog_list[ $details['blog_id'] ] = $details;
-		$blog_list[ $details['blog_id'] ]['postcount'] = $wpdb->get_var( "SELECT COUNT(ID) FROM " . $wpdb->get_blog_prefix( $details['blog_id'] ). "posts WHERE post_status='publish' AND post_type='post'" );
+		$blog_list[ $details['blog_id'] ]              = $details;
+		$blog_list[ $details['blog_id'] ]['postcount'] = $wpdb->get_var( 'SELECT COUNT(ID) FROM ' . $wpdb->get_blog_prefix( $details['blog_id'] ) . "posts WHERE post_status='publish' AND post_type='post'" );
 	}
 
 	if ( ! $blog_list ) {
@@ -225,10 +229,10 @@ function get_most_active_blogs( $num = 10, $display = true ) {
 	if ( is_array( $blogs ) ) {
 		reset( $blogs );
 		$most_active = array();
-		$blog_list = array();
+		$blog_list   = array();
 		foreach ( (array) $blogs as $key => $details ) {
 			$most_active[ $details['blog_id'] ] = $details['postcount'];
-			$blog_list[ $details['blog_id'] ] = $details; // array_slice() removes keys!
+			$blog_list[ $details['blog_id'] ]   = $details; // array_slice() removes keys!
 		}
 		arsort( $most_active );
 		reset( $most_active );
@@ -244,7 +248,7 @@ function get_most_active_blogs( $num = 10, $display = true ) {
 		if ( is_array( $most_active ) ) {
 			reset( $most_active );
 			foreach ( (array) $most_active as $key => $details ) {
-				$url = esc_url('http://' . $details['domain'] . $details['path']);
+				$url = esc_url( 'http://' . $details['domain'] . $details['path'] );
 				echo '<li>' . $details['postcount'] . " <a href='$url'>$url</a></li>";
 			}
 		}
@@ -295,8 +299,9 @@ function wpmu_admin_do_redirect( $url = '' ) {
 	if ( isset( $_GET['redirect'] ) && isset( $_POST['redirect'] ) && $_GET['redirect'] !== $_POST['redirect'] ) {
 		wp_die( __( 'A variable mismatch has been detected.' ), __( 'Sorry, you are not allowed to view this item.' ), 400 );
 	} elseif ( isset( $_GET['redirect'] ) ) {
-		if ( str_starts_with( $_GET['redirect'], 's_' ) )
-			$url .= '&action=blogs&s='. esc_html( substr( $_GET['redirect'], 2 ) );
+		if ( str_starts_with( $_GET['redirect'], 's_' ) ) {
+			$url .= '&action=blogs&s=' . esc_html( substr( $_GET['redirect'], 2 ) );
+		}
 	} elseif ( isset( $_POST['redirect'] ) ) {
 		$url = wpmu_admin_redirect_add_updated_param( $_POST['redirect'] );
 	}
@@ -318,10 +323,11 @@ function wpmu_admin_redirect_add_updated_param( $url = '' ) {
 	_deprecated_function( __FUNCTION__, '3.3.0', 'add_query_arg()' );
 
 	if ( ! str_contains( $url, 'updated=true' ) ) {
-		if ( ! str_contains( $url, '?' ) )
+		if ( ! str_contains( $url, '?' ) ) {
 			return $url . '?updated=true';
-		else
+		} else {
 			return $url . '&updated=true';
+		}
 	}
 	return $url;
 }
@@ -342,15 +348,17 @@ function wpmu_admin_redirect_add_updated_param( $url = '' ) {
 function get_user_id_from_string( $email_or_login ) {
 	_deprecated_function( __FUNCTION__, '3.6.0', 'get_user_by()' );
 
-	if ( is_email( $email_or_login ) )
+	if ( is_email( $email_or_login ) ) {
 		$user = get_user_by( 'email', $email_or_login );
-	elseif ( is_numeric( $email_or_login ) )
+	} elseif ( is_numeric( $email_or_login ) ) {
 		return $email_or_login;
-	else
+	} else {
 		$user = get_user_by( 'login', $email_or_login );
+	}
 
-	if ( $user )
+	if ( $user ) {
 		return $user->ID;
+	}
 	return 0;
 }
 
@@ -368,17 +376,16 @@ function get_blogaddress_by_domain( $domain, $path ) {
 	_deprecated_function( __FUNCTION__, '3.7.0' );
 
 	if ( is_subdomain_install() ) {
-		$url = "http://" . $domain.$path;
-	} else {
-		if ( $domain != $_SERVER['HTTP_HOST'] ) {
+		$url = 'http://' . $domain . $path;
+	} elseif ( $domain != $_SERVER['HTTP_HOST'] ) {
 			$blogname = substr( $domain, 0, strpos( $domain, '.' ) );
-			$url = 'http://' . substr( $domain, strpos( $domain, '.' ) + 1 ) . $path;
+			$url      = 'http://' . substr( $domain, strpos( $domain, '.' ) + 1 ) . $path;
 			// We're not installing the main blog.
-			if ( 'www.' !== $blogname )
-				$url .= $blogname . '/';
-		} else { // Main blog.
-			$url = 'http://' . $domain . $path;
+		if ( 'www.' !== $blogname ) {
+			$url .= $blogname . '/';
 		}
+	} else { // Main blog.
+		$url = 'http://' . $domain . $path;
 	}
 	return sanitize_url( $url );
 }
@@ -398,12 +405,14 @@ function get_blogaddress_by_domain( $domain, $path ) {
 function create_empty_blog( $domain, $path, $weblog_title, $site_id = 1 ) {
 	_deprecated_function( __FUNCTION__, '4.4.0' );
 
-	if ( empty($path) )
+	if ( empty( $path ) ) {
 		$path = '/';
+	}
 
 	// Check if the domain has been used already. We should return an error message.
-	if ( domain_exists($domain, $path, $site_id) )
+	if ( domain_exists( $domain, $path, $site_id ) ) {
 		return __( '<strong>Error:</strong> Site URL you&#8217;ve entered is already taken.' );
+	}
 
 	/*
 	 * Need to back up wpdb table names, and create a new wp_blogs entry for new blog.
@@ -411,11 +420,12 @@ function create_empty_blog( $domain, $path, $weblog_title, $site_id = 1 ) {
 	 * Must restore table names at the end of function.
 	 */
 
-	if ( ! $blog_id = insert_blog($domain, $path, $site_id) )
+	if ( ! $blog_id = insert_blog( $domain, $path, $site_id ) ) {
 		return __( '<strong>Error:</strong> There was a problem creating site entry.' );
+	}
 
-	switch_to_blog($blog_id);
-	install_blog($blog_id);
+	switch_to_blog( $blog_id );
+	install_blog( $blog_id );
 	restore_current_blog();
 
 	return $blog_id;
@@ -441,17 +451,20 @@ function get_admin_users_for_domain( $domain = '', $path = '' ) {
 	if ( ! $domain ) {
 		$network_id = get_current_network_id();
 	} else {
-		$_networks  = get_networks( array(
-			'fields' => 'ids',
-			'number' => 1,
-			'domain' => $domain,
-			'path'   => $path,
-		) );
+		$_networks  = get_networks(
+			array(
+				'fields' => 'ids',
+				'number' => 1,
+				'domain' => $domain,
+				'path'   => $path,
+			)
+		);
 		$network_id = ! empty( $_networks ) ? array_shift( $_networks ) : 0;
 	}
 
-	if ( $network_id )
+	if ( $network_id ) {
 		return $wpdb->get_results( $wpdb->prepare( "SELECT u.ID, u.user_login, u.user_pass FROM $wpdb->users AS u, $wpdb->sitemeta AS sm WHERE sm.meta_key = 'admin_user_id' AND u.ID = sm.meta_value AND sm.site_id = %d", $network_id ), ARRAY_A );
+	}
 
 	return false;
 }
@@ -482,8 +495,9 @@ function get_admin_users_for_domain( $domain = '', $path = '' ) {
 function wp_get_sites( $args = array() ) {
 	_deprecated_function( __FUNCTION__, '4.6.0', 'get_sites()' );
 
-	if ( wp_is_large_network() )
+	if ( wp_is_large_network() ) {
 		return array();
+	}
 
 	$defaults = array(
 		'network_id' => get_current_network_id(),
@@ -499,28 +513,28 @@ function wp_get_sites( $args = array() ) {
 	$args = wp_parse_args( $args, $defaults );
 
 	// Backward compatibility.
-	if( is_array( $args['network_id'] ) ){
+	if ( is_array( $args['network_id'] ) ) {
 		$args['network__in'] = $args['network_id'];
-		$args['network_id'] = null;
+		$args['network_id']  = null;
 	}
 
-	if( is_numeric( $args['limit'] ) ){
+	if ( is_numeric( $args['limit'] ) ) {
 		$args['number'] = $args['limit'];
-		$args['limit'] = null;
+		$args['limit']  = null;
 	} elseif ( ! $args['limit'] ) {
 		$args['number'] = 0;
-		$args['limit'] = null;
+		$args['limit']  = null;
 	}
 
 	// Make sure count is disabled.
 	$args['count'] = false;
 
-	$_sites  = get_sites( $args );
+	$_sites = get_sites( $args );
 
 	$results = array();
 
 	foreach ( $_sites as $_site ) {
-		$_site = get_site( $_site );
+		$_site     = get_site( $_site );
 		$results[] = $_site->to_array();
 	}
 
@@ -569,7 +583,7 @@ function is_user_option_local( $key, $user_id = 0, $blog_id = 0 ) {
  * @param int    $site_id Unless you're running a multi-network install, be sure to set this value to 1.
  * @return int|false The ID of the new row
  */
-function insert_blog($domain, $path, $site_id) {
+function insert_blog( $domain, $path, $site_id ) {
 	_deprecated_function( __FUNCTION__, '5.1.0', 'wp_insert_site()' );
 
 	$data = array(

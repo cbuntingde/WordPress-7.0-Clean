@@ -2448,10 +2448,8 @@ final class WP_Customize_Manager {
 			if ( ! current_user_can( get_post_type_object( 'customize_changeset' )->cap->create_posts ) ) {
 				wp_send_json_error( 'cannot_create_changeset_post' );
 			}
-		} else {
-			if ( ! current_user_can( get_post_type_object( 'customize_changeset' )->cap->edit_post, $changeset_post_id ) ) {
+		} elseif ( ! current_user_can( get_post_type_object( 'customize_changeset' )->cap->edit_post, $changeset_post_id ) ) {
 				wp_send_json_error( 'cannot_edit_changeset_post' );
-			}
 		}
 
 		if ( ! empty( $_POST['customize_changeset_data'] ) ) {

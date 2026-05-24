@@ -14,7 +14,7 @@
  * @output wp-includes/js/api-request.js
  */
 
-( function( $ ) {
+( function ( $ ) {
 	var wpApiSettings = window.wpApiSettings;
 
 	function apiRequest( options ) {
@@ -22,9 +22,9 @@
 		return apiRequest.transport( options );
 	}
 
-	apiRequest.buildAjaxOptions = function( options ) {
-		var url = options.url;
-		var path = options.path;
+	apiRequest.buildAjaxOptions = function ( options ) {
+		var url    = options.url;
+		var path   = options.path;
 		var method = options.method;
 		var namespaceTrimmed, endpointTrimmed, apiRoot;
 		var headers, addNonceHeader, addAcceptHeader, headerName;
@@ -34,7 +34,7 @@
 			typeof options.endpoint === 'string'
 		) {
 			namespaceTrimmed = options.namespace.replace( /^\/|\/$/g, '' );
-			endpointTrimmed = options.endpoint.replace( /^\//, '' );
+			endpointTrimmed  = options.endpoint.replace( /^\//, '' );
 			if ( endpointTrimmed ) {
 				path = namespaceTrimmed + '/' + endpointTrimmed;
 			} else {
@@ -43,7 +43,7 @@
 		}
 		if ( typeof path === 'string' ) {
 			apiRoot = wpApiSettings.root;
-			path = path.replace( /^\//, '' );
+			path    = path.replace( /^\//, '' );
 
 			// API root may already include query parameter prefix
 			// if site is configured to use plain permalinks.
@@ -55,7 +55,7 @@
 		}
 
 		// If ?_wpnonce=... is present, no need to add a nonce header.
-		addNonceHeader = ! ( options.data && options.data._wpnonce );
+		addNonceHeader  = ! ( options.data && options.data._wpnonce );
 		addAcceptHeader = true;
 
 		headers = options.headers || {};
@@ -79,35 +79,48 @@
 
 		if ( addNonceHeader ) {
 			// Do not mutate the original headers object, if any.
-			headers = $.extend( {
-				'X-WP-Nonce': wpApiSettings.nonce
-			}, headers );
+			headers = $.extend(
+				{
+					'X-WP-Nonce': wpApiSettings.nonce
+				},
+				headers
+			);
 		}
 
 		if ( addAcceptHeader ) {
-			headers = $.extend( {
-				'Accept': 'application/json, */*;q=0.1'
-			}, headers );
+			headers = $.extend(
+				{
+					'Accept': 'application/json, */*;q=0.1'
+				},
+				headers
+			);
 		}
 
 		if ( typeof method === 'string' ) {
 			method = method.toUpperCase();
 
 			if ( 'PUT' === method || 'DELETE' === method ) {
-				headers = $.extend( {
-					'X-HTTP-Method-Override': method
-				}, headers );
+				headers = $.extend(
+					{
+						'X-HTTP-Method-Override': method
+					},
+					headers
+				);
 
 				method = 'POST';
 			}
 		}
 
 		// Do not mutate the original options object.
-		options = $.extend( {}, options, {
-			headers: headers,
-			url: url,
-			method: method
-		} );
+		options = $.extend(
+			{},
+			options,
+			{
+				headers: headers,
+				url: url,
+				method: method
+			}
+		);
 
 		delete options.path;
 		delete options.namespace;
@@ -119,6 +132,6 @@
 	apiRequest.transport = $.ajax;
 
 	/** @namespace wp */
-	window.wp = window.wp || {};
+	window.wp            = window.wp || {};
 	window.wp.apiRequest = apiRequest;
 } )( jQuery );

@@ -136,10 +136,9 @@ $blog_details = get_site();
 		</form>
 
 		<?php
-	} else {
-		if ( is_wp_error( $result ) && in_array( $result->get_error_code(), $valid_error_codes, true ) ) {
+	} elseif ( is_wp_error( $result ) && in_array( $result->get_error_code(), $valid_error_codes, true ) ) {
 			$signup = $result->get_error_data();
-			?>
+		?>
 			<h2><?php _e( 'Your account is now active!' ); ?></h2>
 			<?php
 			echo '<p class="lead-in">';
@@ -163,17 +162,17 @@ $blog_details = get_site();
 				);
 			}
 			echo '</p>';
-		} elseif ( null === $result || is_wp_error( $result ) ) {
-			?>
+	} elseif ( null === $result || is_wp_error( $result ) ) {
+		?>
 			<h2><?php _e( 'An error occurred during the activation' ); ?></h2>
 			<?php if ( is_wp_error( $result ) ) : ?>
 				<p><?php echo esc_html( $result->get_error_message() ); ?></p>
 			<?php endif; ?>
 			<?php
-		} else {
-			$url  = isset( $result['blog_id'] ) ? esc_url( get_home_url( (int) $result['blog_id'] ) ) : '';
-			$user = get_userdata( (int) $result['user_id'] );
-			?>
+	} else {
+		$url  = isset( $result['blog_id'] ) ? esc_url( get_home_url( (int) $result['blog_id'] ) ) : '';
+		$user = get_userdata( (int) $result['user_id'] );
+		?>
 			<h2><?php _e( 'Your account is now active!' ); ?></h2>
 
 			<div id="signup-welcome">
@@ -206,7 +205,6 @@ $blog_details = get_site();
 				</p>
 				<?php
 				endif;
-		}
 	}
 	?>
 	</div>

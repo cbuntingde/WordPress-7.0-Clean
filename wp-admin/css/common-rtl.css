@@ -762,7 +762,7 @@ img.emoji {
 }
 
 /*------------------------------------------------------------------------------
-  1.0 - Text Styles
+	1.0 - Text Styles
 ------------------------------------------------------------------------------*/
 
 .widget .widget-top,
@@ -921,12 +921,12 @@ a#remove-post-thumbnail:hover,
 }
 
 .application-password-display .success {
-    color: #007017;
-    margin-right: 0.5rem;
+	color: #007017;
+	margin-right: 0.5rem;
 }
 
 /*------------------------------------------------------------------------------
-  3.0 - Actions
+	3.0 - Actions
 ------------------------------------------------------------------------------*/
 
 #major-publishing-actions {
@@ -1436,7 +1436,7 @@ th.action-links {
 }
 
 /*------------------------------------------------------------------------------
-  4.0 - Notifications
+	4.0 - Notifications
 ------------------------------------------------------------------------------*/
 
 .notice,
@@ -1593,7 +1593,7 @@ div.error.notice-alt {
 }
 
 #plugin-information-footer .notice {
-    margin-top: -5px;
+	margin-top: -5px;
 }
 
 .update-message p:before,
@@ -1819,7 +1819,7 @@ p.auto-update-status {
 
 /* @todo: this does not need its own section anymore */
 /*------------------------------------------------------------------------------
-  6.0 - Admin Header
+	6.0 - Admin Header
 ------------------------------------------------------------------------------*/
 #adminmenu a,
 #taglist a,
@@ -1828,7 +1828,7 @@ p.auto-update-status {
 }
 
 /*------------------------------------------------------------------------------
-  6.1 - Screen Options Tabs
+	6.1 - Screen Options Tabs
 ------------------------------------------------------------------------------*/
 
 #screen-options-wrap,
@@ -2001,7 +2001,7 @@ p.auto-update-status {
 }
 
 /*------------------------------------------------------------------------------
-  6.2 - Help Menu
+	6.2 - Help Menu
 ------------------------------------------------------------------------------*/
 
 #contextual-help-wrap {
@@ -2103,7 +2103,7 @@ p.auto-update-status {
 }
 
 /*------------------------------------------------------------------------------
-  8.0 - Layout Blocks
+	8.0 - Layout Blocks
 ------------------------------------------------------------------------------*/
 
 html.wp-toolbar {
@@ -2348,7 +2348,7 @@ html.wp-toolbar {
 }
 
 /*------------------------------------------------------------------------------
-  21.0 - Admin Footer
+	21.0 - Admin Footer
 ------------------------------------------------------------------------------*/
 
 #wpfooter {
@@ -2371,7 +2371,7 @@ html.wp-toolbar {
 }
 
 /*------------------------------------------------------------------------------
-  25.0 - Tabbed Admin Screen Interface (Experimental)
+	25.0 - Tabbed Admin Screen Interface (Experimental)
 ------------------------------------------------------------------------------*/
 
 .nav-tab {
@@ -2439,7 +2439,7 @@ h1.nav-tab-wrapper, /* Back-compat for pre-4.4 */
 }
 
 /*------------------------------------------------------------------------------
-  26.0 - Misc
+	26.0 - Misc
 ------------------------------------------------------------------------------*/
 
 .spinner {
@@ -3305,7 +3305,7 @@ img {
 .postbox .handle-order-higher .order-higher-indicator::before,
 .postbox .handle-order-lower .order-lower-indicator::before {
 	position: relative;
-    top: 0.11rem;
+	top: 0.11rem;
 	width: 20px;
 	height: 20px;
 }
@@ -3951,7 +3951,7 @@ img {
  * HiDPI Displays
  */
 @media print,
-  (min-resolution: 120dpi) {
+	(min-resolution: 120dpi) {
 	/* Back-compat for pre-3.8 */
 	div.star-holder,
 	div.star-holder .star-rating {
@@ -4291,7 +4291,7 @@ img {
 /* Smartphone */
 @media screen and (max-width: 600px) {
 	/* Disable horizontal scroll when responsive menu is open
-	   since we push the main content off to the right. */
+		since we push the main content off to the right. */
 	#wpwrap.wp-responsive-open {
 		overflow-x: hidden;
 	}
@@ -4351,7 +4351,7 @@ img {
 
 @media screen and (max-width: 320px) {
 	/* Prevent default center alignment and larger font for the Right Now widget when
-	   the network dashboard is viewed on a small mobile device. */
+		the network dashboard is viewed on a small mobile device. */
 	#network_dashboard_right_now .subsubsub {
 		font-size: 14px;
 		text-align: right;

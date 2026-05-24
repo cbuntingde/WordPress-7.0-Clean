@@ -44,5 +44,5 @@
  * These variables do not appear to be used anywhere else.
  */
 .wp-block-text-columns .block-editor-rich-text__editable:focus {
-  outline: 1px solid #ddd;
+	outline: 1px solid #ddd;
 }

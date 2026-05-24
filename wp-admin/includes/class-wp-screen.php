@@ -266,14 +266,12 @@ final class WP_Screen {
 			if ( ! $in_admin ) {
 				$in_admin = 'site';
 			}
-		} else {
-			if ( defined( 'WP_NETWORK_ADMIN' ) && WP_NETWORK_ADMIN ) {
+		} elseif ( defined( 'WP_NETWORK_ADMIN' ) && WP_NETWORK_ADMIN ) {
 				$in_admin = 'network';
-			} elseif ( defined( 'WP_USER_ADMIN' ) && WP_USER_ADMIN ) {
-				$in_admin = 'user';
-			} else {
-				$in_admin = 'site';
-			}
+		} elseif ( defined( 'WP_USER_ADMIN' ) && WP_USER_ADMIN ) {
+			$in_admin = 'user';
+		} else {
+			$in_admin = 'site';
 		}
 
 		if ( 'index' === $id ) {

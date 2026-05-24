@@ -1195,7 +1195,7 @@ function wp_kses_split( $content, $allowed_html, $allowed_protocols ) {
 	$pass_allowed_html      = $allowed_html;
 	$pass_allowed_protocols = $allowed_protocols;
 
-	$token_pattern = <<<REGEX
+	$token_pattern = <<<'REGEX'
 ~
 	(                      # Detect comments of various flavors before attempting to find tags.
 		(<!--.*?(-->|$))   #  - Normative HTML comments.

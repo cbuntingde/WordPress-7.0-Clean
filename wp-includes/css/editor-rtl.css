@@ -1,6 +1,6 @@
 /*! This file is auto-generated */
 /*------------------------------------------------------------------------------
- TinyMCE and Quicklinks toolbars
+TinyMCE and Quicklinks toolbars
 ------------------------------------------------------------------------------*/
 
 /* TinyMCE widgets/containers */
@@ -1383,7 +1383,7 @@ i.mce-i-wp_code:before {
 }
 
 /*------------------------------------------------------------------------------
- wp-link
+wp-link
 ------------------------------------------------------------------------------*/
 
 #wp-link-wrap {
@@ -1881,7 +1881,7 @@ html:lang(he-il) .rtl .quicktags-toolbar input {
 
 /* HiDPI */
 @media print,
-  (min-resolution: 120dpi) {
+	(min-resolution: 120dpi) {
 	.wp-media-buttons .add_media span.wp-media-buttons-icon {
 		background: none;
 	}

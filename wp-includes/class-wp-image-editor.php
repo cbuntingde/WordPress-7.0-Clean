@@ -237,7 +237,6 @@ abstract class WP_Image_Editor {
 	 * @param int   $quality Compression Quality. Range: [1,100]
 	 * @param array $dims    Optional. Image dimensions array with 'width' and 'height' keys.
 	 * @return true|WP_Error True if set successfully; WP_Error on failure.
-
 	 */
 	public function set_quality( $quality = null, $dims = array() ) {
 		// Use the output mime type if present. If not, fall back to the input/initial mime type.

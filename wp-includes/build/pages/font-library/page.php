@@ -147,7 +147,7 @@ function wp_font_library_render_page() {
 
 	// Get all registered routes and menu items
 	$menu_items = wp_get_font_library_menu_items();
-	$routes = wp_get_font_library_routes();
+	$routes     = wp_get_font_library_routes();
 
 	// Get boot module asset file for dependencies
 	$asset_file = ABSPATH . WPINC . '/js/dist/script-modules/boot/index.min.asset.php';
@@ -160,7 +160,7 @@ function wp_font_library_render_page() {
 		wp_register_script( 'font-library-prerequisites', '', $asset['dependencies'], $asset['version'], true );
 
 		// Add inline script to initialize the app
-		$init_modules = [];
+		$init_modules = array();
 		wp_add_inline_script(
 			'font-library-prerequisites',
 			sprintf(

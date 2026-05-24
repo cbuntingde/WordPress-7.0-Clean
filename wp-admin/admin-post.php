@@ -57,28 +57,26 @@ if ( ! is_user_logged_in() ) {
 		 */
 		do_action( "admin_post_nopriv_{$action}" );
 	}
-} else {
-	if ( empty( $action ) ) {
+} elseif ( empty( $action ) ) {
 		/**
 		 * Fires on an authenticated admin post request where no action is supplied.
 		 *
 		 * @since 2.6.0
 		 */
 		do_action( 'admin_post' );
-	} else {
-		// If no action is registered, return a Bad Request response.
-		if ( ! has_action( "admin_post_{$action}" ) ) {
-			wp_die( '', 400 );
-		}
-
-		/**
-		 * Fires on an authenticated admin post request for the given action.
-		 *
-		 * The dynamic portion of the hook name, `$action`, refers to the given
-		 * request action.
-		 *
-		 * @since 2.6.0
-		 */
-		do_action( "admin_post_{$action}" );
+} else {
+	// If no action is registered, return a Bad Request response.
+	if ( ! has_action( "admin_post_{$action}" ) ) {
+		wp_die( '', 400 );
 	}
+
+	/**
+	 * Fires on an authenticated admin post request for the given action.
+	 *
+	 * The dynamic portion of the hook name, `$action`, refers to the given
+	 * request action.
+	 *
+	 * @since 2.6.0
+	 */
+	do_action( "admin_post_{$action}" );
 }

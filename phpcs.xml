@@ -1,35 +1,21 @@
 <?xml version="1.0"?>
 <ruleset name="WordPress 7.0">
     <description>WordPress Coding Standards</description>
-    
-    <file>wp-admin</file>
+
+    <file>wp-admin/includes</file>
     <file>wp-includes</file>
-    
-    <exclude-pattern>*/node_modules/*</exclude-pattern>
+
     <exclude-pattern>*/vendor/*</exclude-pattern>
     <exclude-pattern>*/tests/*</exclude-pattern>
     <exclude-pattern>*/third-party/*</exclude-pattern>
-    <exclude-pattern>*/third-party</exclude-pattern>
-    <exclude-pattern>*/php-ai-client/*</exclude-pattern>
-    
-    <rule ref="WordPress">
-        <exclude name="ExtraParameters"/>
-        <exclude name="FunctionsUsedInsteadOfFunction"/>
-        <exclude name="GetFunction-ValidHelperName"/>
-        <exclude name="LowerCaseTitleConstants"/>
-        <exclude name="Mathconstants"/>
-        <exclude name="NativeFunctionsCaseTooLate"/>
-        <exclude name="NormalizedArrays"/>
-        <exclude name="Pear.MissingRequiresFile"/>
-        <exclude name="PHPDisallowSprprintfChangedPriority"/>
-        <exclude name="PHPTypeCasting"/>
-        <exclude name="PreparedSQLPlaceholders"/>
-        <exclude name="RestODocumentation"/>
-        <exclude name="SetHtmlConstitutionElements"/>
-        <exclude name="ShouldUseWordPressLoadingGrab"/>
-        <exclude name="Sound.SillyMnemonic"/>
-        <exclude name="ValidPolymorphicFunctions"/>
-        <exclude name="ValidUsingNamespacedFunctions"/>
-        <exclude name="VariablesUsedShouldBeLocal"/>
-    </rule>
+    <exclude-pattern>*/sodium_compat/*</exclude-pattern>
+    <exclude-pattern>*/SimplePie/*</exclude-pattern>
+    <exclude-pattern>*/ID3/*</exclude-pattern>
+    <exclude-pattern>*/blocks/*</exclude-pattern>
+    <exclude-pattern>*/css/*</exclude-pattern>
+    <exclude-pattern>*/js/*</exclude-pattern>
+    <exclude-pattern>*/images/*</exclude-pattern>
+    <exclude-pattern>*/rest-api/*</exclude-pattern>
+
+    <rule ref="WordPress-Core"/>
 </ruleset>

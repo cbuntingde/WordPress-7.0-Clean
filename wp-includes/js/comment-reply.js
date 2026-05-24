@@ -8,7 +8,7 @@
  *
  * @type {Object}
  */
-window.addComment = ( function( window ) {
+window.addComment = ( function ( window ) {
 	// Avoid scope lookups on commonly used variables.
 	var document = window.document;
 
@@ -33,7 +33,7 @@ window.addComment = ( function( window ) {
 	 * Check browser supports dataset.
 	 * !! sets the variable to true if the property exists.
 	 */
-	var supportsDataset = !! document.documentElement.dataset;
+	var supportsDataset = ! ! document.documentElement.dataset;
 
 	// For holding the cancel element.
 	var cancelElement;
@@ -85,7 +85,7 @@ window.addComment = ( function( window ) {
 		}
 
 		// Get required elements.
-		cancelElement = getElementById( config.cancelReplyId );
+		cancelElement      = getElementById( config.cancelReplyId );
 		commentFormElement = getElementById( config.commentFormId );
 
 		// No cancel element, no replies.
@@ -97,7 +97,7 @@ window.addComment = ( function( window ) {
 		cancelElement.addEventListener( 'click',      cancelEvent );
 
 		// Submit the comment form when the user types [Ctrl] or [Cmd] + [Enter].
-		var submitFormHandler = function( e ) {
+		var submitFormHandler = function ( e ) {
 			if ( ( e.metaKey || e.ctrlKey ) && e.keyCode === 13 && document.activeElement.tagName.toLowerCase() !== 'a' ) {
 				commentFormElement.removeEventListener( 'keydown', submitFormHandler );
 				e.preventDefault();
@@ -143,8 +143,7 @@ window.addComment = ( function( window ) {
 		if ( document.getElementsByClassName ) {
 			// Fastest.
 			allReplyLinks = context.getElementsByClassName( selectorClass );
-		}
-		else {
+		} else {
 			// Fast.
 			allReplyLinks = context.querySelectorAll( '.' + selectorClass );
 		}
@@ -160,7 +159,7 @@ window.addComment = ( function( window ) {
 	 * @param {Event} event The calling event.
 	 */
 	function cancelEvent( event ) {
-		var cancelLink = this;
+		var cancelLink       = this;
 		var temporaryFormId  = config.temporaryFormId;
 		var temporaryElement = getElementById( temporaryFormId );
 
@@ -199,14 +198,14 @@ window.addComment = ( function( window ) {
 	 * @param {Event} event The calling event.
 	 */
 	function clickEvent( event ) {
-		var replyNode = getElementById( config.commentReplyTitleId );
+		var replyNode           = getElementById( config.commentReplyTitleId );
 		var defaultReplyHeading = replyNode && replyNode.firstChild.textContent;
-		var replyLink = this,
-			commId    = getDataAttribute( replyLink, 'belowelement' ),
-			parentId  = getDataAttribute( replyLink, 'commentid' ),
-			respondId = getDataAttribute( replyLink, 'respondelement' ),
-			postId    = getDataAttribute( replyLink, 'postid' ),
-			replyTo   = getDataAttribute( replyLink, 'replyto' ) || defaultReplyHeading,
+		var replyLink           = this,
+			commId              = getDataAttribute( replyLink, 'belowelement' ),
+			parentId            = getDataAttribute( replyLink, 'commentid' ),
+			respondId           = getDataAttribute( replyLink, 'respondelement' ),
+			postId              = getDataAttribute( replyLink, 'postid' ),
+			replyTo             = getDataAttribute( replyLink, 'replyto' ) || defaultReplyHeading,
 			follow;
 
 		if ( ! commId || ! parentId || ! respondId || ! postId ) {
@@ -280,8 +279,7 @@ window.addComment = ( function( window ) {
 	function getDataAttribute( element, attribute ) {
 		if ( supportsDataset ) {
 			return element.dataset[attribute];
-		}
-		else {
+		} else {
 			return element.getAttribute( 'data-' + attribute );
 		}
 	}
@@ -315,11 +313,11 @@ window.addComment = ( function( window ) {
 	function moveForm( addBelowId, commentId, respondId, postId, replyTo ) {
 		// Get elements based on their IDs.
 		var addBelowElement = getElementById( addBelowId );
-		respondElement  = getElementById( respondId );
+		respondElement      = getElementById( respondId );
 
 		// Get the hidden fields.
-		var parentIdField   = getElementById( config.parentIdFieldId );
-		var postIdField     = getElementById( config.postIdFieldId );
+		var parentIdField = getElementById( config.parentIdFieldId );
+		var postIdField   = getElementById( config.postIdFieldId );
 		var element, cssHidden, style;
 
 		var replyHeading         = getElementById( config.commentReplyTitleId );
@@ -359,14 +357,14 @@ window.addComment = ( function( window ) {
 		 * This is for backward compatibility with third party commenting systems
 		 * hooking into the event using older techniques.
 		 */
-		cancelElement.onclick = function() {
+		cancelElement.onclick = function () {
 			return false;
 		};
 
 		// Focus on the first field in the comment form.
 		try {
 			for ( var i = 0; i < commentFormElement.elements.length; i++ ) {
-				element = commentFormElement.elements[i];
+				element   = commentFormElement.elements[i];
 				cssHidden = false;
 
 				// Get elements computed style.
@@ -397,8 +395,7 @@ window.addComment = ( function( window ) {
 				// Stop after the first focusable element.
 				break;
 			}
-		}
-		catch(e) {
+		} catch (e) {
 
 		}
 
@@ -420,9 +417,9 @@ window.addComment = ( function( window ) {
 	 * @param {HTMLelement} respondElement the #respond element holding comment form.
 	 */
 	function addPlaceHolder( respondElement ) {
-		var temporaryFormId  = config.temporaryFormId;
-		var temporaryElement = getElementById( temporaryFormId );
-		var replyElement = getElementById( config.commentReplyTitleId );
+		var temporaryFormId    = config.temporaryFormId;
+		var temporaryElement   = getElementById( temporaryFormId );
+		var replyElement       = getElementById( config.commentReplyTitleId );
 		var initialHeadingText = replyElement ? replyElement.firstChild.textContent : '';
 
 		if ( temporaryElement ) {
@@ -430,10 +427,10 @@ window.addComment = ( function( window ) {
 			return;
 		}
 
-		temporaryElement = document.createElement( 'div' );
-		temporaryElement.id = temporaryFormId;
+		temporaryElement               = document.createElement( 'div' );
+		temporaryElement.id            = temporaryFormId;
 		temporaryElement.style.display = 'none';
-		temporaryElement.textContent = initialHeadingText;
+		temporaryElement.textContent   = initialHeadingText;
 		respondElement.parentNode.insertBefore( temporaryElement, respondElement );
 	}
 

@@ -581,10 +581,8 @@ function image_resize_dimensions( $orig_w, $orig_h, $dest_w, $dest_h, $crop = fa
 		if ( $orig_h < $dest_h ) {
 			return false;
 		}
-	} else {
-		if ( $orig_w < $dest_w && $orig_h < $dest_h ) {
+	} elseif ( $orig_w < $dest_w && $orig_h < $dest_h ) {
 			return false;
-		}
 	}
 
 	if ( $crop ) {

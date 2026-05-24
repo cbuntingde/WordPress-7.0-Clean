@@ -250,8 +250,8 @@ class WP_Script_Modules {
 	 *
 	 * @since 6.9.0
 	 *
-	 * @param string           $id        Script module identifier.
-	 * @param bool             $in_footer Whether to print in the footer.
+	 * @param string $id        Script module identifier.
+	 * @param bool   $in_footer Whether to print in the footer.
 	 * @return bool Whether setting the printing location was successful.
 	 */
 	public function set_in_footer( string $id, bool $in_footer ): bool {

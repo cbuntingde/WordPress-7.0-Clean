@@ -4788,13 +4788,12 @@ function paginate_links( $args = '' ) {
 			);
 
 			$dots = true;
-		else :
-			if ( $args['show_all'] || ( $n <= $end_size || ( $current && $n >= $current - $mid_size && $n <= $current + $mid_size ) || $n > $total - $end_size ) ) :
+		elseif ( $args['show_all'] || ( $n <= $end_size || ( $current && $n >= $current - $mid_size && $n <= $current + $mid_size ) || $n > $total - $end_size ) ) :
 				$link = str_replace( '%_%', 1 === $n ? '' : $args['format'], $args['base'] );
 				$link = str_replace( '%#%', $n, $link );
-				if ( $add_args ) {
-					$link = add_query_arg( $add_args, $link );
-				}
+			if ( $add_args ) {
+				$link = add_query_arg( $add_args, $link );
+			}
 				$link .= $args['add_fragment'];
 
 				$page_links[] = sprintf(
@@ -4809,7 +4808,6 @@ function paginate_links( $args = '' ) {
 				$page_links[] = '<span class="page-numbers dots">' . __( '&hellip;' ) . '</span>';
 
 				$dots = false;
-			endif;
 		endif;
 	endfor;
 

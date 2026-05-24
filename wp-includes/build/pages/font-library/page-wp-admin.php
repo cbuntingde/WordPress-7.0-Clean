@@ -122,7 +122,7 @@ function wp_font_library_wp_admin_enqueue_scripts( $hook_suffix ) {
 	// 1. Menu page via admin.php?page=font-library-wp-admin (plugin)
 	// 2. Direct file via font-library.php (Core) - screen ID will be 'font-library'
 	$current_screen = get_current_screen();
-	$is_our_page = (
+	$is_our_page    = (
 		( isset( $_GET['page'] ) && 'font-library-wp-admin' === $_GET['page'] ) || // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		( $current_screen && 'font-library' === $current_screen->id )
 	);

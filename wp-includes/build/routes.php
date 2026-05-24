@@ -27,8 +27,8 @@ foreach ( $routes as $route ) {
 
 // Store routes data in globals for each page
 foreach ( $routes_by_page as $page_slug => $page_routes ) {
-	$page_slug_underscore = str_replace( '-', '_', $page_slug );
-	$global_name = 'wp_' . $page_slug_underscore . '_routes_data';
+	$page_slug_underscore    = str_replace( '-', '_', $page_slug );
+	$global_name             = 'wp_' . $page_slug_underscore . '_routes_data';
 	$GLOBALS[ $global_name ] = $page_routes;
 }
 
@@ -44,15 +44,15 @@ function wp_register_page_routes( $page_routes, $register_function_name ) {
 
 	foreach ( $page_routes as $route ) {
 		$content_handle = null;
-		$route_handle = null;
+		$route_handle   = null;
 
 		// Register content module if exists
 		if ( $route['has_content'] ) {
 			$content_asset_path = __DIR__ . "/routes/{$route['name']}/content.min.asset.php";
 			if ( file_exists( $content_asset_path ) ) {
-				$content_asset = require $content_asset_path;
+				$content_asset  = require $content_asset_path;
 				$content_handle = 'wp/routes/' . $route['name'] . '/content';
-				$extension = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '.js' : '.min.js';
+				$extension      = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '.js' : '.min.js';
 				// Deregister first to override any previously registered version
 				// (e.g., Core's default modules when running as a plugin).
 				wp_deregister_script_module( $content_handle );
@@ -69,9 +69,9 @@ function wp_register_page_routes( $page_routes, $register_function_name ) {
 		if ( $route['has_route'] ) {
 			$route_asset_path = __DIR__ . "/routes/{$route['name']}/route.min.asset.php";
 			if ( file_exists( $route_asset_path ) ) {
-				$route_asset = require $route_asset_path;
+				$route_asset  = require $route_asset_path;
 				$route_handle = 'wp/routes/' . $route['name'] . '/route';
-				$extension = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '.js' : '.min.js';
+				$extension    = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '.js' : '.min.js';
 				// Deregister first to override any previously registered version
 				// (e.g., Core's default modules when running as a plugin).
 				wp_deregister_script_module( $route_handle );
@@ -129,4 +129,3 @@ function wp_register_font_library_wp_admin_page_routes() {
 	wp_register_page_routes( $wp_font_library_routes_data, 'wp_register_font_library_wp_admin_route' );
 }
 add_action( 'font-library-wp-admin_init', 'wp_register_font_library_wp_admin_page_routes' );
-

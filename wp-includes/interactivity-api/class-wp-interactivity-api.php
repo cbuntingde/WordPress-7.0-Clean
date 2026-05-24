@@ -1248,7 +1248,7 @@ final class WP_Interactivity_API {
 	 * @return string The CSS styles for the router's top loading bar animation.
 	 */
 	private function get_router_animation_styles(): string {
-		return <<<CSS
+		return <<<'CSS'
 			.wp-interactivity-router-loading-bar {
 				position: fixed;
 				top: 0;
@@ -1301,7 +1301,7 @@ CSS;
 	 * @since 6.7.0
 	 */
 	public function print_router_markup() {
-		echo <<<HTML
+		echo <<<'HTML'
 			<div
 				class="wp-interactivity-router-loading-bar"
 				data-wp-interactive="core/router/private"

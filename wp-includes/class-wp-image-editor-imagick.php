@@ -150,13 +150,11 @@ class WP_Image_Editor_Imagick extends WP_Image_Editor {
 				if ( is_wp_error( $pdf_loaded ) ) {
 					return $pdf_loaded;
 				}
-			} else {
-				if ( wp_is_stream( $this->file ) ) {
+			} elseif ( wp_is_stream( $this->file ) ) {
 					// Due to reports of issues with streams with `Imagick::readImageFile()`, uses `Imagick::readImageBlob()` instead.
 					$this->image->readImageBlob( file_get_contents( $this->file ), $this->file );
-				} else {
-					$this->image->readImage( $this->file );
-				}
+			} else {
+				$this->image->readImage( $this->file );
 			}
 
 			if ( ! $this->image->valid() ) {

@@ -12,8 +12,8 @@
  *
  * @phpstan-param  array{ "id"?: positive-int } $attributes
  *
- * @param array   $attributes The block attributes.
- * @param string  $content    The block content.
+ * @param array  $attributes The block attributes.
+ * @param string $content    The block content.
  * @return string The block content with the dimensions added.
  */
 function render_block_core_video( array $attributes, string $content ): string {

@@ -182,6 +182,7 @@ class WP_Icons_Registry {
 	 * Sanitizes the icon SVG content.
 	 *
 	 * Logic borrowed from twentytwenty.
+	 *
 	 * @see twentytwenty_get_theme_svg
 	 *
 	 * @param string $icon_content The icon SVG content to sanitize.
@@ -245,7 +246,6 @@ class WP_Icons_Registry {
 	/**
 	 * Retrieves an array containing the properties of a registered icon.
 	 *
-	 *
 	 * @param string $icon_name Icon name including namespace.
 	 * @return array|null Registered icon properties or `null` if the icon is not registered.
 	 */
@@ -284,7 +284,6 @@ class WP_Icons_Registry {
 	/**
 	 * Checks if an icon is registered.
 	 *
-	 *
 	 * @param string $icon_name Icon name including namespace.
 	 * @return bool True if the icon is registered, false otherwise.
 	 */
@@ -296,7 +295,6 @@ class WP_Icons_Registry {
 	 * Utility method to retrieve the main instance of the class.
 	 *
 	 * The instance will be created if it does not exist yet.
-	 *
 	 *
 	 * @return WP_Icons_Registry The main instance.
 	 */

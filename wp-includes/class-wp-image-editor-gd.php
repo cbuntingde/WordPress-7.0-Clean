@@ -413,7 +413,7 @@ class WP_Image_Editor_GD extends WP_Image_Editor {
 				imagealphablending( $rotated, true );
 				imagesavealpha( $rotated, true );
 
-imagedestroy( $this->image );
+				imagedestroy( $this->image );
 
 				$this->image = $rotated;
 				$this->update_size();
@@ -446,7 +446,7 @@ imagedestroy( $this->image );
 			$sh = $horz ? -$h : $h;
 
 			if ( imagecopyresampled( $dst, $this->image, 0, 0, $sx, $sy, $w, $h, $sw, $sh ) ) {
-imagedestroy( $this->image );
+				imagedestroy( $this->image );
 
 				$this->image = $dst;
 

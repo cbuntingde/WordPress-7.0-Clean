@@ -114,8 +114,7 @@ class WP_Themes_List_Table extends WP_List_Table {
 				return;
 			}
 			// Else, fallthrough. install_themes doesn't help if you can't enable it.
-		} else {
-			if ( current_user_can( 'install_themes' ) ) {
+		} elseif ( current_user_can( 'install_themes' ) ) {
 				printf(
 					/* translators: %s: URL to Add Themes screen. */
 					__( 'You only have one theme installed right now. Live a little! You can choose from over 1,000 free themes in the WordPress Theme Directory at any time: just click on the <a href="%s">Install Themes</a> tab above.' ),
@@ -123,7 +122,6 @@ class WP_Themes_List_Table extends WP_List_Table {
 				);
 
 				return;
-			}
 		}
 		// Fallthrough.
 		printf(

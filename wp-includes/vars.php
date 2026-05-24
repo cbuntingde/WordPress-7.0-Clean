@@ -48,12 +48,10 @@ if ( is_admin() ) {
 			$pagenow .= '.php'; // For `Options +Multiviews`: /wp-admin/themes/index.php (themes.php is queried).
 		}
 	}
-} else {
-	if ( preg_match( '#([^/]+\.php)([?/].*?)?$#i', $_SERVER['PHP_SELF'], $self_matches ) ) {
+} elseif ( preg_match( '#([^/]+\.php)([?/].*?)?$#i', $_SERVER['PHP_SELF'], $self_matches ) ) {
 		$pagenow = strtolower( $self_matches[1] );
-	} else {
-		$pagenow = 'index.php';
-	}
+} else {
+	$pagenow = 'index.php';
 }
 unset( $self_matches );
 

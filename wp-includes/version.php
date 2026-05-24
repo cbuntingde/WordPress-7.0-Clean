@@ -23,6 +23,6 @@ $wp_version = '7.0';
  *
  * @global int $wp_db_version
  */
-$wp_db_version = 80000;
-$required_php_version = '8.5';
+$wp_db_version          = 80000;
+$required_php_version   = '8.5';
 $required_mysql_version = '8.0';

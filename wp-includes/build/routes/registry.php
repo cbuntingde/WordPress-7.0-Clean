@@ -27,5 +27,5 @@ return array(
 		'page'        => 'font-library',
 		'has_route'   => true,
 		'has_content' => false,
-	)
+	),
 );

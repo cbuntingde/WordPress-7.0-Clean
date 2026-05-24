@@ -5,7 +5,7 @@
  * @package WordPress
  * @since 6.9.0
  *
- * @param array $attributes The block attributes.
+ * @param array  $attributes The block attributes.
  * @param string $content The block content.
  *
  * @return string Returns the updated markup.

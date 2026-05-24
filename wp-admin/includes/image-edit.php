@@ -608,10 +608,10 @@ function _crop_image_resource( $img, $x, $y, $w, $h ) {
 
 	if ( is_gd_image( $dst ) ) {
 		if ( imagecopy( $dst, $img, 0, 0, $x, $y, $w, $h ) ) {
-		imagedestroy( $img );
+			imagedestroy( $img );
 
-		$img = $dst;
-	}
+			$img = $dst;
+		}
 	}
 
 	return $img;

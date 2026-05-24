@@ -3757,10 +3757,8 @@ function wp_handle_comment_submission( $comment_data ) {
 				add_filter( 'pre_comment_content', 'wp_filter_kses' );
 			}
 		}
-	} else {
-		if ( get_option( 'comment_registration' ) ) {
+	} elseif ( get_option( 'comment_registration' ) ) {
 			return new WP_Error( 'not_logged_in', __( 'Sorry, you must be logged in to comment.' ), 403 );
-		}
 	}
 
 	$comment_type = 'comment';

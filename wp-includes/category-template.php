@@ -905,20 +905,18 @@ function wp_generate_tag_cloud( $tags, $args = '' ) {
 	if ( $tags_sorted !== $tags ) {
 		$tags = $tags_sorted;
 		unset( $tags_sorted );
-	} else {
-		if ( 'RAND' === $args['order'] ) {
+	} elseif ( 'RAND' === $args['order'] ) {
 			shuffle( $tags );
+	} else {
+		// SQL cannot save you; this is a second (potentially different) sort on a subset of data.
+		if ( 'name' === $args['orderby'] ) {
+			uasort( $tags, '_wp_object_name_sort_cb' );
 		} else {
-			// SQL cannot save you; this is a second (potentially different) sort on a subset of data.
-			if ( 'name' === $args['orderby'] ) {
-				uasort( $tags, '_wp_object_name_sort_cb' );
-			} else {
-				uasort( $tags, '_wp_object_count_sort_cb' );
-			}
+			uasort( $tags, '_wp_object_count_sort_cb' );
+		}
 
-			if ( 'DESC' === $args['order'] ) {
-				$tags = array_reverse( $tags, true );
-			}
+		if ( 'DESC' === $args['order'] ) {
+			$tags = array_reverse( $tags, true );
 		}
 	}
 

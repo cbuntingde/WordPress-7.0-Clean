@@ -3625,11 +3625,9 @@ function make_site_theme() {
 			// TODO: rm -rf the site theme directory.
 			return false;
 		}
-	} else {
-		if ( ! make_site_theme_from_default( $theme_name, $template ) ) {
+	} elseif ( ! make_site_theme_from_default( $theme_name, $template ) ) {
 			// TODO: rm -rf the site theme directory.
 			return false;
-		}
 	}
 
 	// Make the new site theme active.

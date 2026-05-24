@@ -4979,12 +4979,10 @@ function sanitize_option( $option, $value ) {
 			$value = $wpdb->strip_invalid_text_for_column( $wpdb->options, 'option_value', $value );
 			if ( is_wp_error( $value ) ) {
 				$error = $value->get_error_message();
-			} else {
-				if ( preg_match( '#http(s?)://(.+)#i', $value ) ) {
+			} elseif ( preg_match( '#http(s?)://(.+)#i', $value ) ) {
 					$value = sanitize_url( $value );
-				} else {
-					$error = __( 'The WordPress address you entered did not appear to be a valid URL. Please enter a valid URL.' );
-				}
+			} else {
+				$error = __( 'The WordPress address you entered did not appear to be a valid URL. Please enter a valid URL.' );
 			}
 			break;
 
@@ -4992,12 +4990,10 @@ function sanitize_option( $option, $value ) {
 			$value = $wpdb->strip_invalid_text_for_column( $wpdb->options, 'option_value', $value );
 			if ( is_wp_error( $value ) ) {
 				$error = $value->get_error_message();
-			} else {
-				if ( preg_match( '#http(s?)://(.+)#i', $value ) ) {
+			} elseif ( preg_match( '#http(s?)://(.+)#i', $value ) ) {
 					$value = sanitize_url( $value );
-				} else {
-					$error = __( 'The Site address you entered did not appear to be a valid URL. Please enter a valid URL.' );
-				}
+			} else {
+				$error = __( 'The Site address you entered did not appear to be a valid URL. Please enter a valid URL.' );
 			}
 			break;
 

@@ -296,7 +296,7 @@ function block_core_breadcrumbs_get_post_title( $post_id_or_object ) {
  *
  * @since 7.0.0
  *
- * @param int    $post_id   The post ID.
+ * @param int $post_id   The post ID.
  *
  * @return array Array of breadcrumb item data.
  */

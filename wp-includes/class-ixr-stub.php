@@ -1,6 +1,7 @@
 <?php
 /**
  * Minimal IXR stub for pingback compatibility.
+ *
  * @ignore
  */
 
@@ -24,10 +25,10 @@ if ( ! class_exists( 'WP_HTTP_IXR_Client', false ) ) {
 	class WP_HTTP_IXR_Client {
 		public $client;
 		public $useragent = 'WordPress IXR Client';
-		public $timeout = 3;
-		public $debug = false;
-		public $path = '/';
-		public $host = '';
+		public $timeout   = 3;
+		public $debug     = false;
+		public $path      = '/';
+		public $host      = '';
 
 		public function __construct( $server, $path = '/' ) {
 			$this->host = $server;

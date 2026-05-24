@@ -88,17 +88,17 @@
  * @param {String} $size - The size of the squares in the checkerboard pattern. Default is 12px.
  */
 .wp-block-table {
-  margin: 0 0 1em 0;
+	margin: 0 0 1em 0;
 }
 .wp-block-table td,
 .wp-block-table th {
-  word-break: normal;
+	word-break: normal;
 }
 .wp-block-table :where(figcaption) {
-  color: #555;
-  font-size: 13px;
-  text-align: center;
+	color: #555;
+	font-size: 13px;
+	text-align: center;
 }
 .is-dark-theme .wp-block-table :where(figcaption) {
-  color: rgba(255, 255, 255, 0.65);
+	color: rgba(255, 255, 255, 0.65);
 }

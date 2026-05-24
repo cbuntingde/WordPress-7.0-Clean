@@ -11,11 +11,11 @@
  */
 
 /* jshint -W057, -W058 */
-var fakeJSHINT = new function() {
+var fakeJSHINT = new function () {
 	var syntax, errors;
-	var that = this;
-	this.data = [];
-	this.convertError = function( error ){
+	var that          = this;
+	this.data         = [];
+	this.convertError = function ( error ) {
 		return {
 			line: error.lineNumber,
 			character: error.column,
@@ -23,9 +23,9 @@ var fakeJSHINT = new function() {
 			code: 'E'
 		};
 	};
-	this.parse = function( code ){
+	this.parse        = function ( code ) {
 		try {
-			syntax = window.esprima.parse(code, { tolerant: true, loc: true });
+			syntax = window.esprima.parse( code, { tolerant: true, loc: true } );
 			errors = syntax.errors;
 			if ( errors.length > 0 ) {
 				for ( var i = 0; i < errors.length; i++) {
@@ -41,13 +41,11 @@ var fakeJSHINT = new function() {
 	};
 };
 
-window.JSHINT = function( text ){
+window.JSHINT      = function ( text ) {
 	fakeJSHINT.parse( text );
 };
-window.JSHINT.data = function(){
+window.JSHINT.data = function () {
 	return {
 		errors: fakeJSHINT.data
 	};
 };
-
-

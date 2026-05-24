@@ -767,7 +767,8 @@ All at ###SITENAME###
  * @return array The filtered response.
  */
 function wp_privacy_process_personal_data_export_page( $response, $exporter_index, $email_address, $page, $request_id, $send_as_email, $exporter_key ) {
-	/* Do some simple checks on the shape of the response from the exporter.
+	/*
+	Do some simple checks on the shape of the response from the exporter.
 	 * If the exporter response is malformed, don't attempt to consume it - let it
 	 * pass through to generate a warning to the user by default Ajax processing.
 	 */

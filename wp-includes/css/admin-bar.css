@@ -814,7 +814,7 @@ html:lang(he-il) .rtl #wpadminbar * {
 	#wpadminbar .quicklinks .menupop.hover ul li .ab-item,
 	#wpadminbar.nojs .quicklinks .menupop:hover ul li .ab-item,
 	#wpadminbar .shortlink-input {
-	    line-height: 1.6;
+		line-height: 1.6;
 	}
 
 	#wpadminbar .ab-label {

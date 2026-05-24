@@ -30,11 +30,13 @@ function wpmu_checkAvailableSpace() {
 	_deprecated_function( __FUNCTION__, '3.0.0', 'is_upload_space_available()' );
 
 	if ( ! is_upload_space_available() ) {
-		wp_die( sprintf(
+		wp_die(
+			sprintf(
 			/* translators: %s: Allowed space allocation. */
-			__( 'Sorry, you have used your space allocation of %s. Please delete some files to upload more files.' ),
-			size_format( get_space_allowed() * MB_IN_BYTES )
-		) );
+				__( 'Sorry, you have used your space allocation of %s. Please delete some files to upload more files.' ),
+				size_format( get_space_allowed() * MB_IN_BYTES )
+			)
+		);
 	}
 }
 

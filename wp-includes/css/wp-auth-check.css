@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------------------
- Interim login dialog
+Interim login dialog
 ------------------------------------------------------------------------------*/
 
 #wp-auth-check-wrap.hidden {
@@ -68,7 +68,7 @@
 }
 
 @media print,
-  (min-resolution: 120dpi) {
+	(min-resolution: 120dpi) {
 
 	#wp-auth-check-form.loading:before {
 		background-image: url(../images/spinner-2x.gif);

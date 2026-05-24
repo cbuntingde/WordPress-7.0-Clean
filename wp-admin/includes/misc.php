@@ -1276,8 +1276,8 @@ function wp_refresh_post_nonces( $response, $data, $screen_id ) {
  *
  * @since 6.1.0
  *
- * @param array  $response  The Heartbeat response.
- * @param array  $data      The $_POST data sent.
+ * @param array $response  The Heartbeat response.
+ * @param array $data      The $_POST data sent.
  * @return array The Heartbeat response.
  */
 function wp_refresh_metabox_loader_nonces( $response, $data ) {

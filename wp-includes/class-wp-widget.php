@@ -198,7 +198,7 @@ class WP_Widget {
 	 */
 	public function WP_Widget( $id_base, $name, $widget_options = array(), $control_options = array() ) {
 		_deprecated_constructor( 'WP_Widget', '4.3.0', get_class( $this ) );
-		WP_Widget::__construct( $id_base, $name, $widget_options, $control_options );
+		self::__construct( $id_base, $name, $widget_options, $control_options );
 	}
 
 	/**

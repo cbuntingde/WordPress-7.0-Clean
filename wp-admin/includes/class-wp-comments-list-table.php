@@ -224,6 +224,7 @@ class WP_Comments_List_Table extends WP_List_Table {
 
 	/**
 	 * Displays a message when no comments are found.
+	 *
 	 * @global string $comment_status The current comment status filter.
 	 */
 	public function no_items() {

@@ -1074,12 +1074,11 @@ function populate_network( $network_id = 1, $domain = '', $email = '', $site_nam
 		if ( get_network( $network_id ) ) {
 			$errors->add( 'siteid_exists', __( 'The network already exists.' ) );
 		}
-	} else {
-		if ( $network_id === (int) $wpdb->get_var(
-			$wpdb->prepare( "SELECT id FROM $wpdb->site WHERE id = %d", $network_id )
-		) ) {
+	} elseif ( $network_id === (int) $wpdb->get_var(
+		$wpdb->prepare( "SELECT id FROM $wpdb->site WHERE id = %d", $network_id )
+	) ) {
+
 			$errors->add( 'siteid_exists', __( 'The network already exists.' ) );
-		}
 	}
 
 	if ( ! is_email( $email ) ) {

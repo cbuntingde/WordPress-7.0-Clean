@@ -64,12 +64,10 @@ function _wp_translate_postdata( $update = false, $post_data = null ) {
 
 	if ( ! empty( $post_data['post_author_override'] ) ) {
 		$post_data['post_author'] = (int) $post_data['post_author_override'];
-	} else {
-		if ( ! empty( $post_data['post_author'] ) ) {
+	} elseif ( ! empty( $post_data['post_author'] ) ) {
 			$post_data['post_author'] = (int) $post_data['post_author'];
-		} else {
-			$post_data['post_author'] = (int) $post_data['user_ID'];
-		}
+	} else {
+		$post_data['post_author'] = (int) $post_data['user_ID'];
 	}
 
 	if ( isset( $post_data['user_ID'] ) && ( $post_data['post_author'] !== $post_data['user_ID'] )
@@ -81,12 +79,10 @@ function _wp_translate_postdata( $update = false, $post_data = null ) {
 			} else {
 				return new WP_Error( 'edit_others_posts', __( 'Sorry, you are not allowed to edit posts as this user.' ) );
 			}
-		} else {
-			if ( 'page' === $post_data['post_type'] ) {
+		} elseif ( 'page' === $post_data['post_type'] ) {
 				return new WP_Error( 'edit_others_pages', __( 'Sorry, you are not allowed to create pages as this user.' ) );
-			} else {
-				return new WP_Error( 'edit_others_posts', __( 'Sorry, you are not allowed to create posts as this user.' ) );
-			}
+		} else {
+			return new WP_Error( 'edit_others_posts', __( 'Sorry, you are not allowed to create posts as this user.' ) );
 		}
 	}
 
@@ -1568,13 +1564,11 @@ function get_sample_permalink_html( $post, $new_title = null, $new_slug = null )
 		if ( 'draft' === $post->post_status || empty( $post->post_name ) ) {
 			$view_link      = get_preview_post_link( $post );
 			$preview_target = " target='wp-preview-{$post->ID}'";
-		} else {
-			if ( 'publish' === $post->post_status || 'attachment' === $post->post_type ) {
+		} elseif ( 'publish' === $post->post_status || 'attachment' === $post->post_type ) {
 				$view_link = get_permalink( $post );
-			} else {
-				// Allow non-published (private, future) to be viewed at a pretty permalink, in case $post->post_name is set.
-				$view_link = str_replace( array( '%pagename%', '%postname%' ), $post->post_name, $permalink );
-			}
+		} else {
+			// Allow non-published (private, future) to be viewed at a pretty permalink, in case $post->post_name is set.
+			$view_link = str_replace( array( '%pagename%', '%postname%' ), $post->post_name, $permalink );
 		}
 	}
 

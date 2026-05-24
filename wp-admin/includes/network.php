@@ -443,25 +443,24 @@ function network_step2( $errors = false ) {
 		} else {
 			$subdomain_install = false;
 		}
-	} else {
-		if ( is_multisite() ) {
+	} elseif ( is_multisite() ) {
 			$subdomain_install = is_subdomain_install();
-			?>
+		?>
 	<p><?php _e( 'The original configuration steps are shown here for reference.' ); ?></p>
 			<?php
-		} else {
-			$subdomain_install = (bool) $wpdb->get_var( "SELECT meta_value FROM $wpdb->sitemeta WHERE site_id = 1 AND meta_key = 'subdomain_install'" );
+	} else {
+		$subdomain_install = (bool) $wpdb->get_var( "SELECT meta_value FROM $wpdb->sitemeta WHERE site_id = 1 AND meta_key = 'subdomain_install'" );
 
-			wp_admin_notice(
-				'<strong>' . __( 'Warning:' ) . '</strong> ' . __( 'An existing WordPress network was detected.' ),
-				array(
-					'additional_classes' => array( 'error' ),
-				)
-			);
-			?>
+		wp_admin_notice(
+			'<strong>' . __( 'Warning:' ) . '</strong> ' . __( 'An existing WordPress network was detected.' ),
+			array(
+				'additional_classes' => array( 'error' ),
+			)
+		);
+		?>
 	<p><?php _e( 'Please complete the configuration steps. To create a new network, you will need to empty or remove the network database tables.' ); ?></p>
 			<?php
-		}
+
 	}
 
 	$subdir_match          = $subdomain_install ? '' : '([_0-9a-zA-Z-]+/)?';

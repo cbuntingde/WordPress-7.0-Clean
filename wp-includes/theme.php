@@ -1405,10 +1405,8 @@ function _get_random_header_data() {
 		} elseif ( ! empty( $_wp_default_headers ) ) {
 			if ( 'random-default-image' === $header_image_mod ) {
 				$headers = $_wp_default_headers;
-			} else {
-				if ( current_theme_supports( 'custom-header', 'random-default' ) ) {
+			} elseif ( current_theme_supports( 'custom-header', 'random-default' ) ) {
 					$headers = $_wp_default_headers;
-				}
 			}
 		}
 
@@ -1474,14 +1472,12 @@ function is_random_header_image( $type = 'any' ) {
 		) {
 			return true;
 		}
-	} else {
-		if ( "random-$type-image" === $header_image_mod ) {
+	} elseif ( "random-$type-image" === $header_image_mod ) {
 			return true;
-		} elseif ( 'default' === $type
+	} elseif ( 'default' === $type
 			&& empty( $header_image_mod ) && '' !== get_random_header_image()
 		) {
-			return true;
-		}
+		return true;
 	}
 
 	return false;

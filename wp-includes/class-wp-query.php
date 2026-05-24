@@ -1435,17 +1435,15 @@ class WP_Query {
 		$query_vars['search_terms_count'] = 1;
 		if ( ! empty( $query_vars['sentence'] ) ) {
 			$query_vars['search_terms'] = array( $query_vars['s'] );
-		} else {
-			if ( preg_match_all( '/".*?("|$)|((?<=[\t ",+])|^)[^\t ",+]+/', $query_vars['s'], $matches ) ) {
+		} elseif ( preg_match_all( '/".*?("|$)|((?<=[\t ",+])|^)[^\t ",+]+/', $query_vars['s'], $matches ) ) {
 				$query_vars['search_terms_count'] = count( $matches[0] );
 				$query_vars['search_terms']       = $this->parse_search_terms( $matches[0] );
 				// If the search string has only short terms or stopwords, or is 10+ terms long, match it as sentence.
-				if ( empty( $query_vars['search_terms'] ) || count( $query_vars['search_terms'] ) > 9 ) {
-					$query_vars['search_terms'] = array( $query_vars['s'] );
-				}
-			} else {
+			if ( empty( $query_vars['search_terms'] ) || count( $query_vars['search_terms'] ) > 9 ) {
 				$query_vars['search_terms'] = array( $query_vars['s'] );
 			}
+		} else {
+			$query_vars['search_terms'] = array( $query_vars['s'] );
 		}
 
 		$n                                  = ! empty( $query_vars['exact'] ) ? '' : '%';
@@ -3523,24 +3521,22 @@ class WP_Query {
 					if ( ! is_user_logged_in() ) {
 						// User must be logged in to view unpublished posts.
 						$this->posts = array();
-					} else {
-						if ( $post_status_obj->protected ) {
+					} elseif ( $post_status_obj->protected ) {
 							// User must have edit permissions on the draft to preview.
-							if ( ! current_user_can( $edit_cap, $this->posts[0]->ID ) ) {
-								$this->posts = array();
-							} else {
-								$this->is_preview = true;
-								if ( 'future' !== $status ) {
-									$this->posts[0]->post_date = current_time( 'mysql' );
-								}
-							}
-						} elseif ( $post_status_obj->private ) {
-							if ( ! current_user_can( $read_cap, $this->posts[0]->ID ) ) {
-								$this->posts = array();
-							}
+						if ( ! current_user_can( $edit_cap, $this->posts[0]->ID ) ) {
+							$this->posts = array();
 						} else {
+							$this->is_preview = true;
+							if ( 'future' !== $status ) {
+								$this->posts[0]->post_date = current_time( 'mysql' );
+							}
+						}
+					} elseif ( $post_status_obj->private ) {
+						if ( ! current_user_can( $read_cap, $this->posts[0]->ID ) ) {
 							$this->posts = array();
 						}
+					} else {
+						$this->posts = array();
 					}
 				} elseif ( ! $post_status_obj ) {
 					// Post status is not registered, assume it's not public.
@@ -3696,16 +3692,12 @@ class WP_Query {
 			$found_posts_query = apply_filters_ref_array( 'found_posts_query', array( 'SELECT FOUND_ROWS()', &$this ) );
 
 			$this->found_posts = (int) $wpdb->get_var( $found_posts_query );
-		} else {
-			if ( is_array( $this->posts ) ) {
+		} elseif ( is_array( $this->posts ) ) {
 				$this->found_posts = count( $this->posts );
-			} else {
-				if ( null === $this->posts ) {
-					$this->found_posts = 0;
-				} else {
-					$this->found_posts = 1;
-				}
-			}
+		} elseif ( null === $this->posts ) {
+				$this->found_posts = 0;
+		} else {
+			$this->found_posts = 1;
 		}
 
 		/**

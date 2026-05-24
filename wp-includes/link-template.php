@@ -782,8 +782,7 @@ function get_post_comments_feed_link( $post_id = 0, $feed = '' ) {
 			}
 			$url = user_trailingslashit( $url, 'single_feed' );
 		}
-	} else {
-		if ( $unattached ) {
+	} elseif ( $unattached ) {
 			$url = add_query_arg(
 				array(
 					'feed'          => $feed,
@@ -791,23 +790,22 @@ function get_post_comments_feed_link( $post_id = 0, $feed = '' ) {
 				),
 				home_url( '/' )
 			);
-		} elseif ( 'page' === $post->post_type ) {
-			$url = add_query_arg(
-				array(
-					'feed'    => $feed,
-					'page_id' => $post_id,
-				),
-				home_url( '/' )
-			);
-		} else {
-			$url = add_query_arg(
-				array(
-					'feed' => $feed,
-					'p'    => $post_id,
-				),
-				home_url( '/' )
-			);
-		}
+	} elseif ( 'page' === $post->post_type ) {
+		$url = add_query_arg(
+			array(
+				'feed'    => $feed,
+				'page_id' => $post_id,
+			),
+			home_url( '/' )
+		);
+	} else {
+		$url = add_query_arg(
+			array(
+				'feed' => $feed,
+				'p'    => $post_id,
+			),
+			home_url( '/' )
+		);
 	}
 
 	/**

@@ -22,6 +22,7 @@ class WP_Font_Utils {
 	 * Adds surrounding quotes to font family names that contain special characters.
 	 *
 	 * It follows the recommendations from the CSS Fonts Module Level 4.
+	 *
 	 * @link https://www.w3.org/TR/css-fonts-4/#font-family-prop
 	 *
 	 * @since 6.5.0
@@ -47,6 +48,7 @@ class WP_Font_Utils {
 	 * - Adds surrounding quotes to names containing any characters that are not alphabetic or dashes.
 	 *
 	 * It follows the recommendations from the CSS Fonts Module Level 4.
+	 *
 	 * @link https://www.w3.org/TR/css-fonts-4/#font-family-prop
 	 *
 	 * @since 6.5.0

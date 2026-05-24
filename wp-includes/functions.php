@@ -1093,12 +1093,10 @@ function add_query_arg( ...$args ) {
 		} else {
 			$uri = $args[1];
 		}
-	} else {
-		if ( count( $args ) < 3 || false === $args[2] ) {
+	} elseif ( count( $args ) < 3 || false === $args[2] ) {
 			$uri = $_SERVER['REQUEST_URI'];
-		} else {
-			$uri = $args[2];
-		}
+	} else {
+		$uri = $args[2];
 	}
 
 	$frag = strstr( $uri, '#' );
@@ -3231,15 +3229,13 @@ function wp_check_filetype_and_ext( $file, $filename, $mimes = null ) {
 				$type = false;
 				$ext  = false;
 			}
-		} else {
-			if ( $type !== $real_mime ) {
+		} elseif ( $type !== $real_mime ) {
 				/*
 				 * Everything else including image/* and application/*:
 				 * If the real content type doesn't match the file extension, assume it's dangerous.
 				 */
 				$type = false;
 				$ext  = false;
-			}
 		}
 	}
 
@@ -3360,13 +3356,13 @@ function wp_get_image_mime( $file ) {
 				 * HEIC/HEIF images and image sequences/animations may have other strings here
 				 * like mif1, msf1, etc. For now fall back to using finfo_file() to detect these.
 				 */
-if ( extension_loaded( 'fileinfo' ) ) {
-				$fileinfo  = finfo_open( FILEINFO_MIME_TYPE );
-				$mime_type = finfo_file( $fileinfo, $file );
+				if ( extension_loaded( 'fileinfo' ) ) {
+								$fileinfo  = finfo_open( FILEINFO_MIME_TYPE );
+								$mime_type = finfo_file( $fileinfo, $file );
 
-				finfo_close( $fileinfo );
+								finfo_close( $fileinfo );
 
-				if ( wp_is_heic_image_mime_type( $mime_type ) ) {
+					if ( wp_is_heic_image_mime_type( $mime_type ) ) {
 						$mime = $mime_type;
 					}
 				}
@@ -4785,7 +4781,7 @@ function smilies_init() {
 			':-|'       => "\xf0\x9f\x98\x90",
 			';-)'       => "\xf0\x9f\x98\x89",
 			// This one transformation breaks regular text with frequency.
-			//     '8)' => "\xf0\x9f\x98\x8e",
+			// '8)' => "\xf0\x9f\x98\x8e",
 			'8O'        => "\xf0\x9f\x98\xaf",
 			':('        => "\xf0\x9f\x99\x81",
 			':)'        => "\xf0\x9f\x99\x82",
@@ -5495,21 +5491,19 @@ function _deprecated_function( $function_name, $version, $replacement = '' ) {
 					$version
 				);
 			}
-		} else {
-			if ( $replacement ) {
+		} elseif ( $replacement ) {
 				$message = sprintf(
 					'Function %1$s is <strong>deprecated</strong> since version %2$s! Use %3$s instead.',
 					$function_name,
 					$version,
 					$replacement
 				);
-			} else {
-				$message = sprintf(
-					'Function %1$s is <strong>deprecated</strong> since version %2$s with no alternative available.',
-					$function_name,
-					$version
-				);
-			}
+		} else {
+			$message = sprintf(
+				'Function %1$s is <strong>deprecated</strong> since version %2$s with no alternative available.',
+				$function_name,
+				$version
+			);
 		}
 
 		wp_trigger_error( '', $message, E_USER_DEPRECATED );
@@ -5579,8 +5573,7 @@ function _deprecated_constructor( $class_name, $version, $parent_class = '' ) {
 					'<code>__construct()</code>'
 				);
 			}
-		} else {
-			if ( $parent_class ) {
+		} elseif ( $parent_class ) {
 				$message = sprintf(
 					'The called constructor method for %1$s class in %2$s is <strong>deprecated</strong> since version %3$s! Use %4$s instead.',
 					$class_name,
@@ -5588,14 +5581,13 @@ function _deprecated_constructor( $class_name, $version, $parent_class = '' ) {
 					$version,
 					'<code>__construct()</code>'
 				);
-			} else {
-				$message = sprintf(
-					'The called constructor method for %1$s class is <strong>deprecated</strong> since version %2$s! Use %3$s instead.',
-					$class_name,
-					$version,
-					'<code>__construct()</code>'
-				);
-			}
+		} else {
+			$message = sprintf(
+				'The called constructor method for %1$s class is <strong>deprecated</strong> since version %2$s! Use %3$s instead.',
+				$class_name,
+				$version,
+				'<code>__construct()</code>'
+			);
 		}
 
 		wp_trigger_error( '', $message, E_USER_DEPRECATED );
@@ -5658,21 +5650,19 @@ function _deprecated_class( $class_name, $version, $replacement = '' ) {
 					$version
 				);
 			}
-		} else {
-			if ( $replacement ) {
+		} elseif ( $replacement ) {
 				$message = sprintf(
 					'Class %1$s is <strong>deprecated</strong> since version %2$s! Use %3$s instead.',
 					$class_name,
 					$version,
 					$replacement
 				);
-			} else {
-				$message = sprintf(
-					'Class %1$s is <strong>deprecated</strong> since version %2$s with no alternative available.',
-					$class_name,
-					$version
-				);
-			}
+		} else {
+			$message = sprintf(
+				'Class %1$s is <strong>deprecated</strong> since version %2$s with no alternative available.',
+				$class_name,
+				$version
+			);
 		}
 
 		wp_trigger_error( '', $message, E_USER_DEPRECATED );
@@ -5740,21 +5730,19 @@ function _deprecated_file( $file, $version, $replacement = '', $message = '' ) {
 					$version
 				) . $message;
 			}
-		} else {
-			if ( $replacement ) {
+		} elseif ( $replacement ) {
 				$message = sprintf(
 					'File %1$s is <strong>deprecated</strong> since version %2$s! Use %3$s instead.',
 					$file,
 					$version,
 					$replacement
 				);
-			} else {
-				$message = sprintf(
-					'File %1$s is <strong>deprecated</strong> since version %2$s with no alternative available.',
-					$file,
-					$version
-				) . $message;
-			}
+		} else {
+			$message = sprintf(
+				'File %1$s is <strong>deprecated</strong> since version %2$s with no alternative available.',
+				$file,
+				$version
+			) . $message;
 		}
 
 		wp_trigger_error( '', $message, E_USER_DEPRECATED );
@@ -5825,21 +5813,19 @@ function _deprecated_argument( $function_name, $version, $message = '' ) {
 					$version
 				);
 			}
-		} else {
-			if ( $message ) {
+		} elseif ( $message ) {
 				$message = sprintf(
 					'Function %1$s was called with an argument that is <strong>deprecated</strong> since version %2$s! %3$s',
 					$function_name,
 					$version,
 					$message
 				);
-			} else {
-				$message = sprintf(
-					'Function %1$s was called with an argument that is <strong>deprecated</strong> since version %2$s with no alternative available.',
-					$function_name,
-					$version
-				);
-			}
+		} else {
+			$message = sprintf(
+				'Function %1$s was called with an argument that is <strong>deprecated</strong> since version %2$s with no alternative available.',
+				$function_name,
+				$version
+			);
 		}
 
 		wp_trigger_error( '', $message, E_USER_DEPRECATED );
@@ -6149,7 +6135,8 @@ function iis7_supports_permalinks() {
 
 	$supports_permalinks = false;
 	if ( $is_iis7 ) {
-		/* First we check if the DOMDocument class exists. If it does not exist, then we cannot
+		/*
+		First we check if the DOMDocument class exists. If it does not exist, then we cannot
 		 * easily update the xml configuration file, hence we just bail out and tell user that
 		 * pretty permalinks cannot be used.
 		 *
@@ -6270,20 +6257,18 @@ function wp_guess_url() {
 			// Strip off any file/query params in the path.
 			$path = preg_replace( '#/[^/]*$#i', '', $_SERVER['PHP_SELF'] );
 
-		} else {
-			if ( str_contains( $_SERVER['SCRIPT_FILENAME'], $abspath_fix ) ) {
+		} elseif ( str_contains( $_SERVER['SCRIPT_FILENAME'], $abspath_fix ) ) {
 				// Request is hitting a file inside ABSPATH.
 				$directory = str_replace( ABSPATH, '', $script_filename_dir );
 				// Strip off the subdirectory, and any file/query params.
 				$path = preg_replace( '#/' . preg_quote( $directory, '#' ) . '/[^/]*$#i', '', $_SERVER['REQUEST_URI'] );
-			} elseif ( str_contains( $abspath_fix, $script_filename_dir ) ) {
-				// Request is hitting a file above ABSPATH.
-				$subdirectory = substr( $abspath_fix, strpos( $abspath_fix, $script_filename_dir ) + strlen( $script_filename_dir ) );
-				// Strip off any file/query params from the path, appending the subdirectory to the installation.
-				$path = preg_replace( '#/[^/]*$#i', '', $_SERVER['REQUEST_URI'] ) . $subdirectory;
-			} else {
-				$path = $_SERVER['REQUEST_URI'];
-			}
+		} elseif ( str_contains( $abspath_fix, $script_filename_dir ) ) {
+			// Request is hitting a file above ABSPATH.
+			$subdirectory = substr( $abspath_fix, strpos( $abspath_fix, $script_filename_dir ) + strlen( $script_filename_dir ) );
+			// Strip off any file/query params from the path, appending the subdirectory to the installation.
+			$path = preg_replace( '#/[^/]*$#i', '', $_SERVER['REQUEST_URI'] ) . $subdirectory;
+		} else {
+			$path = $_SERVER['REQUEST_URI'];
 		}
 
 		$schema = is_ssl() ? 'https://' : 'http://'; // set_url_scheme() is not defined yet.
@@ -7207,15 +7192,13 @@ function wp_debug_backtrace_summary( $ignore_class = null, $skip_frames = 0, $pr
 			}
 
 			$caller[] = "{$call['class']}{$call['type']}{$call['function']}";
-		} else {
-			if ( in_array( $call['function'], array( 'do_action', 'apply_filters', 'do_action_ref_array', 'apply_filters_ref_array' ), true ) ) {
+		} elseif ( in_array( $call['function'], array( 'do_action', 'apply_filters', 'do_action_ref_array', 'apply_filters_ref_array' ), true ) ) {
 				$caller[] = "{$call['function']}('{$call['args'][0]}')";
-			} elseif ( in_array( $call['function'], array( 'include', 'include_once', 'require', 'require_once' ), true ) ) {
-				$filename = $call['args'][0] ?? '';
-				$caller[] = $call['function'] . "('" . str_replace( $truncate_paths, '', wp_normalize_path( $filename ) ) . "')";
-			} else {
-				$caller[] = $call['function'];
-			}
+		} elseif ( in_array( $call['function'], array( 'include', 'include_once', 'require', 'require_once' ), true ) ) {
+			$filename = $call['args'][0] ?? '';
+			$caller[] = $call['function'] . "('" . str_replace( $truncate_paths, '', wp_normalize_path( $filename ) ) . "')";
+		} else {
+			$caller[] = $call['function'];
 		}
 	}
 	if ( $pretty ) {

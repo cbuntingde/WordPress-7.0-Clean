@@ -1399,7 +1399,8 @@ function wp_print_community_events_markup() {
 					<?php _e( 'City:' ); ?>
 				</label>
 				<?php
-				/* translators: Replace with a city related to your locale.
+				/*
+				translators: Replace with a city related to your locale.
 				 * Test that it matches the expected location and has upcoming
 				 * events before including it. If no cities related to your
 				 * locale have events, then use a city related to your locale
@@ -1447,7 +1448,8 @@ function wp_print_community_events_templates() {
 	<script id="tmpl-community-events-could-not-locate" type="text/template">
 		<?php
 		printf(
-			/* translators: %s is the name of the city we couldn't locate.
+			/*
+			translators: %s is the name of the city we couldn't locate.
 			 * Replace the examples with cities in your locale, but test
 			 * that they match the expected location before including them.
 			 * Use endonyms (native locale names) whenever possible.

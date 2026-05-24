@@ -877,14 +877,12 @@ class WP_Customize_Nav_Menu_Item_Setting extends WP_Customize_Setting {
 			if ( is_wp_error( $r ) ) {
 				$this->update_status = 'error';
 				$this->update_error  = $r;
-			} else {
-				if ( $is_placeholder ) {
+			} elseif ( $is_placeholder ) {
 					$this->previous_post_id = $this->post_id;
 					$this->post_id          = $r;
 					$this->update_status    = 'inserted';
-				} else {
-					$this->update_status = 'updated';
-				}
+			} else {
+				$this->update_status = 'updated';
 			}
 		}
 

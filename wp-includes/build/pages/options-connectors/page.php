@@ -147,7 +147,7 @@ function wp_options_connectors_render_page() {
 
 	// Get all registered routes and menu items
 	$menu_items = wp_get_options_connectors_menu_items();
-	$routes = wp_get_options_connectors_routes();
+	$routes     = wp_get_options_connectors_routes();
 
 	// Get boot module asset file for dependencies
 	$asset_file = ABSPATH . WPINC . '/js/dist/script-modules/boot/index.min.asset.php';
@@ -160,7 +160,7 @@ function wp_options_connectors_render_page() {
 		wp_register_script( 'options-connectors-prerequisites', '', $asset['dependencies'], $asset['version'], true );
 
 		// Add inline script to initialize the app
-		$init_modules = [];
+		$init_modules = array();
 		wp_add_inline_script(
 			'options-connectors-prerequisites',
 			sprintf(

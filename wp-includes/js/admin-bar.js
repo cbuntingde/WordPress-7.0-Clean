@@ -12,9 +12,11 @@
  *
  * @return {void}
  */
-( function( document, window, navigator ) {
-	document.addEventListener( 'DOMContentLoaded', function() {
-		var adminBar = document.getElementById( 'wpadminbar' ),
+( function ( document, window, navigator ) {
+	document.addEventListener(
+		'DOMContentLoaded',
+		function () {
+			var adminBar = document.getElementById( 'wpadminbar' ),
 			topMenuItems,
 			allMenuItems,
 			adminBarLogout,
@@ -25,90 +27,105 @@
 			adminBarSearchInput,
 			i;
 
-		if ( ! adminBar || ! ( 'querySelectorAll' in adminBar ) ) {
-			return;
+			if ( ! adminBar || ! ( 'querySelectorAll' in adminBar ) ) {
+				return;
+			}
+
+			topMenuItems       = adminBar.querySelectorAll( 'li.menupop' );
+			allMenuItems       = adminBar.querySelectorAll( '.ab-item' );
+			adminBarLogout     = document.querySelector( '#wp-admin-bar-logout a' );
+			adminBarSearchForm = document.getElementById( 'adminbarsearch' );
+			shortlink          = document.getElementById( 'wp-admin-bar-get-shortlink' );
+			skipLink           = adminBar.querySelector( '.screen-reader-shortcut' );
+			mobileEvent        = /Mobile\/.+Safari/.test( navigator.userAgent ) ? 'touchstart' : 'click';
+
+			// Remove nojs class after the DOM is loaded.
+			removeClass( adminBar, 'nojs' );
+
+			if ( 'ontouchstart' in window ) {
+				// Remove hover class when the user touches outside the menu items.
+				document.body.addEventListener(
+					mobileEvent,
+					function ( e ) {
+						if ( ! getClosest( e.target, 'li.menupop' ) ) {
+							removeAllHoverClass( topMenuItems );
+						}
+					}
+				);
+
+				// Add listener for menu items to toggle hover class by touches.
+				// Remove the callback later for better performance.
+				adminBar.addEventListener(
+					'touchstart',
+					function bindMobileEvents() {
+					for ( var i = 0; i < topMenuItems.length; i++ ) {
+						topMenuItems[i].addEventListener( 'click', mobileHover.bind( null, topMenuItems ) );
+					}
+
+					adminBar.removeEventListener( 'touchstart', bindMobileEvents );
+					}
+				);
+			}
+
+			// Scroll page to top when clicking on the admin bar.
+			adminBar.addEventListener( 'click', scrollToTop );
+
+			for ( i = 0; i < topMenuItems.length; i++ ) {
+				// Adds or removes the hover class based on the hover intent.
+				window.hoverintent(
+					topMenuItems[i],
+					addClass.bind( null, topMenuItems[i], 'hover' ),
+					removeClass.bind( null, topMenuItems[i], 'hover' )
+				).options(
+					{
+						timeout: 180
+					}
+				);
+
+				// Toggle hover class if the enter key is pressed.
+				topMenuItems[i].addEventListener( 'keydown', toggleHoverIfEnter );
+			}
+
+			// Remove hover class if the escape key is pressed.
+			for ( i = 0; i < allMenuItems.length; i++ ) {
+				allMenuItems[i].addEventListener( 'keydown', removeHoverIfEscape );
+			}
+
+			if ( adminBarSearchForm ) {
+				adminBarSearchInput = document.getElementById( 'adminbar-search' );
+
+				// Adds the adminbar-focused class on focus.
+				adminBarSearchInput.addEventListener(
+					'focus',
+					function () {
+						addClass( adminBarSearchForm, 'adminbar-focused' );
+					}
+				);
+
+				// Removes the adminbar-focused class on blur.
+				adminBarSearchInput.addEventListener(
+					'blur',
+					function () {
+						removeClass( adminBarSearchForm, 'adminbar-focused' );
+					}
+				);
+			}
+
+			if ( shortlink ) {
+				shortlink.addEventListener( 'click', clickShortlink );
+			}
+
+			// Prevents the toolbar from covering up content when a hash is present in the URL.
+			if ( window.location.hash ) {
+				window.scrollBy( 0, -32 );
+			}
+
+			// Clear sessionStorage on logging out.
+			if ( adminBarLogout ) {
+				adminBarLogout.addEventListener( 'click', emptySessionStorage );
+			}
 		}
-
-		topMenuItems = adminBar.querySelectorAll( 'li.menupop' );
-		allMenuItems = adminBar.querySelectorAll( '.ab-item' );
-		adminBarLogout = document.querySelector( '#wp-admin-bar-logout a' );
-		adminBarSearchForm = document.getElementById( 'adminbarsearch' );
-		shortlink = document.getElementById( 'wp-admin-bar-get-shortlink' );
-		skipLink = adminBar.querySelector( '.screen-reader-shortcut' );
-		mobileEvent = /Mobile\/.+Safari/.test( navigator.userAgent ) ? 'touchstart' : 'click';
-
-		// Remove nojs class after the DOM is loaded.
-		removeClass( adminBar, 'nojs' );
-
-		if ( 'ontouchstart' in window ) {
-			// Remove hover class when the user touches outside the menu items.
-			document.body.addEventListener( mobileEvent, function( e ) {
-				if ( ! getClosest( e.target, 'li.menupop' ) ) {
-					removeAllHoverClass( topMenuItems );
-				}
-			} );
-
-			// Add listener for menu items to toggle hover class by touches.
-			// Remove the callback later for better performance.
-			adminBar.addEventListener( 'touchstart', function bindMobileEvents() {
-				for ( var i = 0; i < topMenuItems.length; i++ ) {
-					topMenuItems[i].addEventListener( 'click', mobileHover.bind( null, topMenuItems ) );
-				}
-
-				adminBar.removeEventListener( 'touchstart', bindMobileEvents );
-			} );
-		}
-
-		// Scroll page to top when clicking on the admin bar.
-		adminBar.addEventListener( 'click', scrollToTop );
-
-		for ( i = 0; i < topMenuItems.length; i++ ) {
-			// Adds or removes the hover class based on the hover intent.
-			window.hoverintent(
-				topMenuItems[i],
-				addClass.bind( null, topMenuItems[i], 'hover' ),
-				removeClass.bind( null, topMenuItems[i], 'hover' )
-			).options( {
-				timeout: 180
-			} );
-
-			// Toggle hover class if the enter key is pressed.
-			topMenuItems[i].addEventListener( 'keydown', toggleHoverIfEnter );
-		}
-
-		// Remove hover class if the escape key is pressed.
-		for ( i = 0; i < allMenuItems.length; i++ ) {
-			allMenuItems[i].addEventListener( 'keydown', removeHoverIfEscape );
-		}
-
-		if ( adminBarSearchForm ) {
-			adminBarSearchInput = document.getElementById( 'adminbar-search' );
-
-			// Adds the adminbar-focused class on focus.
-			adminBarSearchInput.addEventListener( 'focus', function() {
-				addClass( adminBarSearchForm, 'adminbar-focused' );
-			} );
-
-			// Removes the adminbar-focused class on blur.
-			adminBarSearchInput.addEventListener( 'blur', function() {
-				removeClass( adminBarSearchForm, 'adminbar-focused' );
-			} );
-		}
-
-		if ( shortlink ) {
-			shortlink.addEventListener( 'click', clickShortlink );
-		}
-
-		// Prevents the toolbar from covering up content when a hash is present in the URL.
-		if ( window.location.hash ) {
-			window.scrollBy( 0, -32 );
-		}
-
-		// Clear sessionStorage on logging out.
-		if ( adminBarLogout ) {
-			adminBarLogout.addEventListener( 'click', emptySessionStorage );
-		}
-	} );
+	);
 
 	/**
 	 * Remove hover class for top level menu item when escape is pressed.
@@ -149,7 +166,7 @@
 			return;
 		}
 
-		if ( !! getClosest( event.target, '.ab-sub-wrapper' ) ) {
+		if ( ! ! getClosest( event.target, '.ab-sub-wrapper' ) ) {
 			return;
 		}
 
@@ -179,7 +196,7 @@
 	function mobileHover( topMenuItems, event ) {
 		var wrapper;
 
-		if ( !! getClosest( event.target, '.ab-sub-wrapper' ) ) {
+		if ( ! ! getClosest( event.target, '.ab-sub-wrapper' ) ) {
 			return;
 		}
 
@@ -231,7 +248,7 @@
 
 		input.focus();
 		input.select();
-		input.onblur = function() {
+		input.onblur = function () {
 			removeClass( wrapper, 'selected' );
 		};
 
@@ -251,7 +268,8 @@
 						sessionStorage.removeItem( key );
 					}
 				}
-			} catch ( er ) {}
+			} catch ( er ) {
+			}
 		}
 	}
 
@@ -330,7 +348,7 @@
 			element.classList.remove( className );
 		} else {
 			testName = ' ' + className + ' ';
-			classes = ' ' + element.className + ' ';
+			classes  = ' ' + element.className + ' ';
 
 			while ( classes.indexOf( testName ) > -1 ) {
 				classes = classes.replace( testName, '' );
@@ -380,11 +398,13 @@
 		}
 
 		try {
-			window.scrollTo( {
-				top: -32,
-				left: 0,
-				behavior: 'smooth'
-			} );
+			window.scrollTo(
+				{
+					top: -32,
+					left: 0,
+					behavior: 'smooth'
+				}
+			);
 		} catch ( er ) {
 			window.scrollTo( 0, -32 );
 		}
@@ -407,11 +427,12 @@
 				window.Element.prototype.msMatchesSelector ||
 				window.Element.prototype.oMatchesSelector ||
 				window.Element.prototype.webkitMatchesSelector ||
-				function( s ) {
+				function ( s ) {
 					var matches = ( this.document || this.ownerDocument ).querySelectorAll( s ),
-						i = matches.length;
+						i       = matches.length;
 
-					while ( --i >= 0 && matches.item( i ) !== this ) { }
+					while ( --i >= 0 && matches.item( i ) !== this ) {
+					}
 
 					return i > -1;
 				};

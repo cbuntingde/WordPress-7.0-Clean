@@ -275,10 +275,8 @@ class WP_Users_List_Table extends WP_List_Table {
 			if ( current_user_can( 'remove_users' ) ) {
 				$actions['remove'] = __( 'Remove' );
 			}
-		} else {
-			if ( current_user_can( 'delete_users' ) ) {
+		} elseif ( current_user_can( 'delete_users' ) ) {
 				$actions['delete'] = __( 'Delete' );
-			}
 		}
 
 		// Add a password reset link to the bulk actions dropdown.

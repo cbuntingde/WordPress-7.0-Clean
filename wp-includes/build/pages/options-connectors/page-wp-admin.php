@@ -122,7 +122,7 @@ function wp_options_connectors_wp_admin_enqueue_scripts( $hook_suffix ) {
 	// 1. Menu page via admin.php?page=options-connectors-wp-admin (plugin)
 	// 2. Direct file via options-connectors.php (Core) - screen ID will be 'options-connectors'
 	$current_screen = get_current_screen();
-	$is_our_page = (
+	$is_our_page    = (
 		( isset( $_GET['page'] ) && 'options-connectors-wp-admin' === $_GET['page'] ) || // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		( $current_screen && 'options-connectors' === $current_screen->id )
 	);

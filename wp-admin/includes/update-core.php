@@ -228,7 +228,7 @@ $_old_files = array(
 	'wp-includes/js/jquery/autocomplete.js',
 	'wp-includes/js/jquery/interface.js',
 	// Following file added back in 5.1, see #45645.
-	//'wp-includes/js/tinymce/wp-tinymce.js',
+	// 'wp-includes/js/tinymce/wp-tinymce.js',
 	// 3.1
 	'wp-admin/edit-attachment-rows.php',
 	'wp-admin/edit-link-categories.php',

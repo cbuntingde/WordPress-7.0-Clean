@@ -1,14 +1,19 @@
 parameters:
-    level: 0
+    level: 6
     paths:
-        - wp-admin
+        - wp-admin/includes
         - wp-includes
-
     excludePaths:
         - vendor
-        - wp-includes/blocks/*
-        - wp-includes/deprecated.php (?)
-        - wp-includes/rss.php (?)
-        - wp-includes/class-IXR.php (?)
-        - wp-includes/IXR (?)
-        - wp-includes/taxonomy.php (?)
+        - wp-includes/sodium_compat
+        - wp-includes/SimplePie
+        - wp-includes/ID3
+    autoload_file:
+        - tests/stubs/wordpress.php
+    ignoreErrors:
+        - '#Constant .+ not found#'
+        - '#Variable .+ might not be defined#'
+        - '#Call to undefined function#'
+        - '#Function .+ not found#'
+        - '#Instantiation of internal class#'
+        - '#extends internal class#'
