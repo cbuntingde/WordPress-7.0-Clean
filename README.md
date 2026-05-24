@@ -6,6 +6,7 @@ This project strips all of that away by requiring PHP 8.5+ and MySQL 8.0.0+. The
 
 ## Latest Changes
 
+- Added disable-core-update mu-plugin to prevent automatic WordPress core updates
 - Removed rss-functions.php (broken reference to missing rss.php)
 - Simplified compat.php to sodium_compat loader only
 - Replaced utf8_encode/utf8_decode with mb_convert_encoding()
@@ -131,6 +132,23 @@ docker compose up -d --build
 ```
 
 Access at http://localhost:8090 (admin / admin123)
+
+## Core Update Protection
+
+This repo includes a must-use plugin that disables automatic WordPress core updates. This prevents accidental core overwrites that would lose the massive changes in this repo.
+
+**How it works:**
+- `wp-content/mu-plugins/disable-core-updates.php` loads automatically on every request
+- Defines `WP_AUTO_UPDATE_CORE = false`
+- Adds `auto_update_core` filter returning false
+
+**For maximum protection**, also add this to your `wp-config.php`:
+
+```php
+define( 'WP_AUTO_UPDATE_CORE', false );
+```
+
+Plugins and themes can still be updated — only core updates are blocked.
 
 ## License
 
