@@ -464,19 +464,23 @@ function core_upgrade_preamble() {
 			<div class="core-update-progress-bar" id="core-update-progress-bar"></div>
 		</div>
 
-		<div class="core-update-actions">
+		<form method="post" action="<?php echo esc_url( self_admin_url( 'update-core.php' ) ); ?>" class="core-update-actions" style="display:flex;gap:12px;">
+			<?php wp_nonce_field( 'upgrade-core' ); ?>
 			<?php if ( $can_update ) : ?>
-				<button type="button" class="button button-primary" id="core-update-btn">
+				<input type="hidden" name="action" value="do-core-upgrade" />
+				<input type="hidden" name="version" value="<?php echo esc_attr( $latest_version ); ?>" />
+				<button type="submit" class="button button-primary" id="core-update-btn">
 					<?php _e( 'Update Now' ); ?>
 				</button>
 			<?php endif; ?>
 
-			<?php if ( current_user_can( 'update_core' ) ) : ?>
-				<button type="button" class="button" id="core-backup-btn">
+			<?php if ( current_user_can( 'update_core' ) : ?>
+				<input type="hidden" name="action" value="do-core-backup" />
+				<button type="submit" class="button" id="core-backup-btn">
 					<?php _e( 'Create Backup' ); ?>
 				</button>
 			<?php endif; ?>
-		</div>
+		</form>
 
 		<?php if ( $backup_info ) : ?>
 			<div class="core-backup-notice">
