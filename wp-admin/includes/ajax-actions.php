@@ -588,7 +588,7 @@ function _wp_ajax_delete_comment_response( $comment_id, $delta = -1 ) {
  * @access private
  */
 function _wp_ajax_add_hierarchical_term() {
-	$action   = $_POST['action'];
+	$action   = isset( $_POST['action'] ) ? sanitize_text_field( wp_unslash( $_POST['action'] ) ) : '';
 	$taxonomy = get_taxonomy( substr( $action, 4 ) );
 	check_ajax_referer( $action, '_ajax_nonce-add-' . $taxonomy->name );
 
@@ -797,7 +797,7 @@ function wp_ajax_delete_tag() {
 		wp_die( -1 );
 	}
 
-	$taxonomy = ! empty( $_POST['taxonomy'] ) ? $_POST['taxonomy'] : 'post_tag';
+	$taxonomy = ! empty( $_POST['taxonomy'] ) ? sanitize_text_field( wp_unslash( $_POST['taxonomy'] ) ) : 'post_tag';
 	$tag      = get_term( $tag_id, $taxonomy );
 
 	if ( ! $tag || is_wp_error( $tag ) ) {
@@ -1092,7 +1092,7 @@ function wp_ajax_add_link_category( $action ) {
 function wp_ajax_add_tag() {
 	check_ajax_referer( 'add-tag', '_wpnonce_add-tag' );
 
-	$taxonomy        = ! empty( $_POST['taxonomy'] ) ? $_POST['taxonomy'] : 'post_tag';
+	$taxonomy        = ! empty( $_POST['taxonomy'] ) ? sanitize_text_field( wp_unslash( $_POST['taxonomy'] ) ) : 'post_tag';
 	$taxonomy_object = get_taxonomy( $taxonomy );
 
 	if ( ! current_user_can( $taxonomy_object->cap->edit_terms ) ) {
