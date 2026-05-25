@@ -1,3 +1,28 @@
+# Dependencies (should be installed via composer locally)
+vendor/
+composer.phar
+composer.json
+composer.lock
+
+# Dev tools
+.php-cs-fixer.cache/
+.phpunit.cache/
+.phpcs.xml
+phpstan.neon
+psalm.xml
+
+# Docker
+docker-compose.yml
+nginx/
+php/
+
+# Tests
+tests/
+test.php
+test2.txt
+test_output.txt
+sql/
+
 # OS files
 .DS_Store
 Thumbs.db
@@ -21,11 +46,6 @@ dist/
 wp-config.php
 wp-content/uploads/
 *.log
-
-# Dependencies
-vendor/
-composer.phar
-.cache/
 
 # Documentation - Only README.md allowed
 *.md
