@@ -26,8 +26,11 @@ function wp_check_github_core_update() {
 		return $cached;
 	}
 
+	// Configurable via wp-config.php: define('WP_GITHUB_REPO', 'user/repo-name');
+	$github_repo = defined( 'WP_GITHUB_REPO' ) ? WP_GITHUB_REPO : 'cbuntingde/WordPress-7.0-Clean';
+
 	$response = wp_remote_get(
-		'https://api.github.com/repos/cbuntingde/WordPress-7.0-Clean/releases/latest',
+		'https://api.github.com/repos/' . $github_repo . '/releases/latest',
 		array(
 			'headers' => array(
 				'Accept'               => 'application/vnd.github+json',

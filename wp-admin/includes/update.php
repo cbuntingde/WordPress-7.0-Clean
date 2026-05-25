@@ -316,7 +316,7 @@ function update_nag() {
 
 	$version_url = sprintf(
 		/* translators: %s: WordPress version. */
-		esc_url( __( 'https://wordpress.org/documentation/wordpress-version/version-%s/' ) ),
+		esc_url( __( 'https://github.com/cbuntingde/WordPress-7.0-Clean/releases/version-%s' ) ),
 		sanitize_title( $cur->current )
 	);
 

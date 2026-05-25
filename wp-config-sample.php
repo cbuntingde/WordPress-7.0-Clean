@@ -87,6 +87,18 @@ $table_prefix = 'wp_';
  */
 define( 'WP_DEBUG', false );
 
+/**
+ * GitHub Repository for Updates (Fork-specific)
+ *
+ * If you're creating your own fork of WordPress-7.0-Clean, set your repo here
+ * to receive updates from your GitHub releases instead of the main repository.
+ *
+ * Format: 'username/repository-name'
+ *
+ * @since 7.0.1
+ */
+define( 'WP_GITHUB_REPO', 'cbuntingde/WordPress-7.0-Clean' );
+
 /* Add any custom values between this line and the "stop editing" line. */
 
 

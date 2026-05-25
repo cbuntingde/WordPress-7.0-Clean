@@ -15,6 +15,7 @@ This fork modernizes WordPress by removing legacy compatibility code. Based on W
 
 - **Core Rollback**: Creates backup before updates; restore from backups on the Updates page if issues occur.
 - **GitHub Updates**: Integrated into core update.php — checks GitHub releases directly, prefers our releases over wordpress.org.
+- **Forkable Updates**: Configure `WP_GITHUB_REPO` in wp-config.php to create your own fork with automatic updates from your GitHub releases.
 
 ## Latest Changes
 
@@ -155,6 +156,19 @@ GitHub release checking is integrated directly into WordPress core (`wp-includes
 - Uses the standard WP Updates UI—no separate plugin needed
 - Shows our releases on the Updates page when newer
 - Applies updates through the normal WP update process
+
+### Forking This Project
+
+To create your own fork with automatic updates:
+
+1. Add this to your `wp-config.php`:
+   ```php
+   define('WP_GITHUB_REPO', 'yourusername/your-fork-name');
+   ```
+
+2. Publish GitHub releases with `.zip` assets (or use the auto-generated source zipball)
+
+3. Users who install your fork will automatically receive updates from your repository
 
 ## License
 
