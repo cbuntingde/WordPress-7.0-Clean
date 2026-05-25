@@ -188,8 +188,6 @@ function wp_ajax_do_core_backup() {
 		wp_send_json_error( array( 'message' => __( 'Permission denied' ) ), 403 );
 	}
 
-	@ini_set( 'implicit_flush', 1 );
-
 	require_once ABSPATH . 'wp-admin/includes/file.php';
 	require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
 	require_once ABSPATH . 'wp-admin/includes/class-core-upgrader.php';
@@ -200,16 +198,7 @@ function wp_ajax_do_core_backup() {
 	}
 
 	$upgrader = new Core_Upgrader();
-
-	ob_start();
-	$result = $upgrader->create_backup_before_update(
-		function( $percent, $message ) {
-			echo json_encode( array( 'progress' => $percent, 'message' => $message ) ) . "\n";
-			flush();
-			ob_flush();
-		}
-	);
-	ob_end_clean();
+	$result = $upgrader->create_backup_before_update();
 
 	if ( is_wp_error( $result ) ) {
 		wp_send_json_error( array( 'message' => $result->get_error_message() ), 500 );
@@ -238,8 +227,6 @@ function wp_ajax_do_core_update() {
 		wp_send_json_error( array( 'message' => __( 'Permission denied' ) ), 403 );
 	}
 
-	@ini_set( 'implicit_flush', 1 );
-
 	require_once ABSPATH . 'wp-admin/includes/file.php';
 	require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
 	require_once ABSPATH . 'wp-admin/includes/class-core-upgrader.php';
@@ -250,17 +237,7 @@ function wp_ajax_do_core_update() {
 	}
 
 	$upgrader = new Core_Upgrader();
-
-	ob_start();
-	$result = $upgrader->upgrade(
-		'wordpress',
-		function( $percent, $message ) {
-			echo json_encode( array( 'progress' => $percent, 'message' => $message ) ) . "\n";
-			flush();
-			ob_flush();
-		}
-	);
-	ob_end_clean();
+	$result = $upgrader->upgrade( 'wordpress' );
 
 	if ( is_wp_error( $result ) ) {
 		wp_send_json_error( array( 'message' => $result->get_error_message() ), 500 );
