@@ -1,69 +1,91 @@
 <?php
 /**
  * Plugin Name: GitHub Core Update Checker
- * Description: Checks GitHub for new releases instead of wordpress.org, with auto-update capability
- * Version: 1.1
+ * Description: Checks GitHub for new releases instead of wordpress.org
+ * Version: 2.0
  */
 
 defined( 'ABSPATH' ) || exit;
 
-require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
-require_once ABSPATH . 'wp-admin/includes/file.php';
-require_once ABSPATH . 'wp-admin/includes/misc.php';
-
 class GitHub_Core_Updater {
 	private const OWNER     = 'cbuntingde';
 	private const REPO      = 'WordPress-7.0-Clean';
-	private const CACHE_KEY = 'wp_github_core_version';
-
-	/**
-	 * Track if an auto-update is in progress
-	 */
-	private static bool $autoUpdating = false;
+	private const CACHE_TTL  = 3600; // 1 hour
 
 	public function __construct() {
-		// Add custom settings page
+		// Inject our update info into WP's core update transient
+		add_filter( 'site_transient_update_core', array( $this, 'inject_core_update' ) );
+
+		// Add settings page
 		add_action( 'admin_menu', array( $this, 'add_settings_page' ) );
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
 
 		// Manual update trigger
 		add_action( 'admin_init', array( $this, 'handle_update_action' ) );
-
-		// Auto-update hook (runs on wp_auto_update cron)
-		add_action( 'wp_maybe_auto_update', array( $this, 'maybe_auto_update' ), 5 );
-
-		// Filter to provide our own version info
-		add_filter( 'pre_update_feed_global', array( $this, 'inject_core_update_info' ), 5 );
 	}
 
 	/**
-	 * Override WordPress core update check with GitHub info
+	 * Inject our GitHub release into WP's core update transient
 	 */
-	public function inject_core_update_info( $value ) {
-		$status = $this->get_update_status();
+	public function inject_core_update( $transient ) {
+		$release = $this->check_for_updates();
 
-		if ( $status['available'] ) {
-			// Hijack the update response to show our version
-			$value = array(
-				'offered' => array(
-					'version' => $status['remote'],
-					'package' => $status['update']['download'],
-					'php_required' => '8.5',
-					'mysql_required' => '8.0',
-					'new_bundled_php' => '8.5',
-					'new_bundled_mysql' => '8.0',
-				),
-			);
+		if ( ! $release ) {
+			return $transient;
 		}
 
-		return $value;
+		$local = $this->get_local_version();
+		$remote_ver = $release['version'];
+
+		$cmp = version_compare( $local, $remote_ver );
+		if ( $cmp >= 0 ) {
+			return $transient;
+		}
+
+		// Build update offer from our GitHub release
+		$offer = array(
+			'response'      => 'upgrade',
+			'download'     => $release['download'],
+			'locale'       => 'en_US',
+			'packages'    => array(
+				'full'        => $release['download'],
+				'new_bundled' => '',
+				'partial'    => '',
+				'rollback'   => '',
+				'no_content' => '',
+			),
+			'current'     => $release['version'],
+			'version'    => $release['version'],
+			'php_version'   => '8.5',
+			'mysql_version' => '8.0',
+			'new_bundled'   => '8.5',
+			'new_files'     => false,
+		);
+
+		// Update the transient
+		if ( ! isset( $transient->updates ) ) {
+			$transient->updates = array();
+		}
+
+		// Filter out any existing WP core offers
+		$transient->updates = array_filter(
+			$transient->updates,
+			function( $offer ) {
+				return ! isset( $offer->response ) || 'upgrade' !== $offer->response;
+			}
+		);
+
+		// Add our offer
+		$transient->updates[] = (object) $offer;
+
+		return $transient;
 	}
 
 	/**
-	 * Check for updates
+	 * Check GitHub for latest release
 	 */
-	private function check_for_updates(): ?array {
-		$cached = get_transient( self::CACHE_KEY );
+	private function check_for_updates() {
+		$cached = get_transient( 'wp_github_core_release' );
 		if ( false !== $cached ) {
 			return $cached;
 		}
@@ -72,8 +94,8 @@ class GitHub_Core_Updater {
 			"https://api.github.com/repos/" . self::OWNER . "/" . self::REPO . "/releases/latest",
 			array(
 				'headers' => array(
-					'Accept'        => 'application/vnd.github+json',
-					'User-Agent'   => 'WordPress-GitHub-Updater',
+					'Accept'               => 'application/vnd.github+json',
+					'User-Agent'          => 'WordPress-GitHub-Updater/' . self::REPO,
 					'X-GitHub-Api-Version' => '2022-11-28',
 				),
 			)
@@ -94,18 +116,18 @@ class GitHub_Core_Updater {
 			return null;
 		}
 
-		// Find the .zip asset
+		// Find .zip asset
 		$download_url = '';
 		if ( ! empty( $data['assets'] ) ) {
 			foreach ( $data['assets'] as $asset ) {
-				if ( preg_match( '/\.zip$/', $asset['name'] ) ) {
+				if ( substr( $asset['name'], -4 ) === '.zip' ) {
 					$download_url = $asset['browser_download_url'];
 					break;
 				}
 			}
 		}
 
-		// Fallback to zipball if no asset
+		// Fallback to source zipball
 		if ( ! $download_url ) {
 			$download_url = $data['zipball_url'] ?? '';
 		}
@@ -118,7 +140,7 @@ class GitHub_Core_Updater {
 			'date'    => $data['published_at'] ?? '',
 		);
 
-		set_transient( self::CACHE_KEY, $result, HOUR_IN_SECONDS );
+		set_transient( 'wp_github_core_release', $result, self::CACHE_TTL );
 
 		return $result;
 	}
@@ -126,39 +148,39 @@ class GitHub_Core_Updater {
 	/**
 	 * Get local version
 	 */
-	public function get_local_version(): string {
+	private function get_local_version() {
 		require ABSPATH . 'wp-includes/version.php';
 		return $wp_version;
 	}
 
 	/**
-	 * Compare versions and return update status
+	 * Get current release info for display
 	 */
-	public function get_update_status(): array {
-		$remote = $this->check_for_updates();
-		$local  = $this->get_local_version();
+	public function get_status() {
+		$release = $this->check_for_updates();
+		$local   = $this->get_local_version();
 
-		if ( ! $remote ) {
+		if ( ! $release ) {
 			return array(
 				'available' => false,
-				'message'  => 'Could not check for updates',
+				'local'    => $local,
 			);
 		}
 
-		$has_update = version_compare( $local, $remote['version'], '<' );
+		$has_update = version_compare( $local, $release['version'], '<' );
 
 		return array(
 			'available' => $has_update,
-			'local'    => $local,
-			'remote'   => $remote['version'],
-			'update'  => $remote,
+			'local'     => $local,
+			'remote'   => $release['version'],
+			'release'  => $release,
 		);
 	}
 
 	/**
-	 * Handle manual update action from settings page
+	 * Handle manual update action
 	 */
-	public function handle_update_action(): void {
+	public function handle_update_action() {
 		if ( ! isset( $_GET['page'] ) || 'github-core-updater' !== $_GET['page'] ) {
 			return;
 		}
@@ -173,89 +195,29 @@ class GitHub_Core_Updater {
 
 		check_admin_referer( 'github-core-update' );
 
-		$this->perform_update();
+		// Trigger WP's built-in update which will use our injected package
+		include ABSPATH . 'wp-admin/includes/class-core-upgrader.php';
+		include ABSPATH . 'wp-admin/includes/file.php';
 
-		wp_safe_redirect( remove_query_arg( 'action', add_query_arg( 'updated', '1', $_SERVER['REQUEST_URI'] ) ) );
-		exit;
-	}
-
-	/**
-	 * Apply the update
-	 */
-	public function perform_update(): bool {
-		$status = $this->get_update_status();
-
-		if ( ! $status['available'] ) {
-			return false;
-		}
-
-		$update = $status['update'];
-
-		// Prevent recursive updates
-		if ( self::$autoUpdating ) {
-			return false;
-		}
-		self::$autoUpdating = true;
-
-		// Create a temp file for the download
-		$temp_dir = get_temp_dir();
-		$temp_zip = $temp_dir . 'wp-github-update.zip';
-
-		// Download the zip
-		$upgrader = new WP_Upgrader();
-		$result  = $upgrader->run( array(
-			'source'            => $update['download'],
-			'destination'      => $temp_dir,
-			'download_file'    => true,
-			'download_filename' => 'wp-github-update.zip',
-		) );
+		$skin = new WP_Upgrader_Skin();
+		$upgrader = new Core_Upgrader( $skin );
+		$result = $upgrader->upgrade( $this->get_local_version() );
 
 		if ( is_wp_error( $result ) ) {
-			self::$autoUpdating = false;
-			return false;
+			set_transient( 'wp_github_update_error', $result->get_error_message(), 60 );
+		} else {
+			set_transient( 'wp_github_updated', 1, 60 );
 		}
 
-		// Extract over current installation
-		$unzip_result = unzip_file( $temp_zip, ABSPATH );
-
-		@unlink( $temp_zip );
-		self::$autoUpdating = false;
-
-		if ( is_wp_error( $unzip_result ) ) {
-			return false;
-		}
-
-		// Clear version cache
-		delete_transient( self::CACHE_KEY );
-		delete_transient( 'update_core' );
-
-		return true;
-	}
-
-	/**
-	 * Auto-update hook (called by WP cron)
-	 */
-	public function maybe_auto_update(): void {
-		$status = $this->get_update_status();
-
-		if ( ! $status['available'] ) {
-			return;
-		}
-
-		// Check if auto-updates are enabled for this install
-		$auto_enabled = get_option( 'github_core_auto_update', false );
-
-		if ( ! $auto_enabled ) {
-			return;
-		}
-
-		$this->perform_update();
+		$redirect = add_query_arg( 'updated', $result ? '1' : '0', remove_query_arg( 'action', $_SERVER['REQUEST_URI'] ) );
+		wp_safe_redirect( $redirect );
+		exit;
 	}
 
 	/**
 	 * Add settings page
 	 */
-	public function add_settings_page(): void {
+	public function add_settings_page() {
 		add_options_page(
 			'GitHub Core Updater',
 			'Core Updater',
@@ -268,7 +230,7 @@ class GitHub_Core_Updater {
 	/**
 	 * Register settings
 	 */
-	public function register_settings(): void {
+	public function register_settings() {
 		register_setting(
 			'github-core-updater',
 			'github_core_auto_update',
@@ -282,22 +244,27 @@ class GitHub_Core_Updater {
 	/**
 	 * Render settings page
 	 */
-	public function render_settings_page(): void {
-		$status = $this->get_update_status();
+	public function render_settings_page() {
+		$status = $this->get_status();
 
 		echo '<div class="wrap">';
 		echo '<h1>GitHub Core Updater</h1>';
 
 		if ( ! empty( $_GET['updated'] ) ) {
-			echo '<div class="notice notice-success is-dismissible"><p>Core updated successfully!</p></div>';
+			$error = get_transient( 'wp_github_update_error' );
+			if ( $_GET['updated'] === '1' && ! $error ) {
+				echo '<div class="notice notice-success"><p>Core updated successfully!</p></div>';
+			} elseif ( $error ) {
+				echo '<div class="notice notice-error"><p>Update failed: ' . esc_html( $error ) . '</p></div>';
+			}
 		}
 
 		echo '<table class="form-table">';
-		echo '<tr><th>Current Version</th><td>' . esc_html( $status['local'] ?? $this->get_local_version() ) . '</td></tr>';
+		echo '<tr><th>Current Version</th><td>' . esc_html( $status['local'] ) . '</td></tr>';
 
 		if ( $status['available'] ) {
 			echo '<tr><th>Available Version</th><td><strong>' . esc_html( $status['remote'] ) . '</strong></td></tr>';
-			echo '<tr><th>Release Notes</th><td>' . nl2br( esc_html( substr( $status['update']['body'], 0, 2000 ) ) ) . '</td></tr>';
+			echo '<tr><th>Release Notes</th><td>' . nl2br( esc_html( substr( $status['release']['body'], 0, 2000 ) ) ) . '</td></tr>';
 
 			echo '<tr><th>Action</th><td>';
 			echo '<a href="' . wp_nonce_url( admin_url( 'options-general.php?page=github-core-updater&action=update_now' ), 'github-core-update' ) . '" class="button button-primary">Update Now</a>';
@@ -308,7 +275,7 @@ class GitHub_Core_Updater {
 
 		echo '<tr><th>Auto-Update</th><td>';
 		echo '<label><input type="checkbox" name="github_core_auto_update" value="1" ' . checked( get_option( 'github_core_auto_update', false ), true, false ) . '> Enable automatic updates</label>';
-		echo '<p class="description">When enabled, WordPress will automatically download and install new releases from GitHub.</p>';
+		echo '<p class="description">Automatically download and install new releases from GitHub.</p>';
 		echo '</td></tr>';
 
 		echo '</table>';
@@ -316,22 +283,19 @@ class GitHub_Core_Updater {
 	}
 }
 
+// Initialize
 new GitHub_Core_Updater();
 
-// Hook into WordPress to show update notification
-add_action( 'admin_notices', 'github_core_check_notice' );
+// Admin notice for update availability
+add_action( 'admin_notices', 'github_core_notice' );
 
-function github_core_check_notice(): void {
+function github_core_notice() {
 	if ( ! current_user_can( 'update_core' ) ) {
 		return;
 	}
 
-	if ( ! class_exists( 'GitHub_Core_Updater' ) ) {
-		return;
-	}
-
 	$updater = new GitHub_Core_Updater();
-	$status  = $updater->get_update_status();
+	$status  = $updater->get_status();
 
 	if ( ! $status['available'] ) {
 		return;
