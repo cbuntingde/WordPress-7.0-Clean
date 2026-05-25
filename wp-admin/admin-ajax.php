@@ -236,8 +236,16 @@ function wp_ajax_do_core_update() {
 		wp_send_json_error( array( 'message' => __( 'Filesystem connection failed' ) ), 500 );
 	}
 
+	// Check for available updates from GitHub
+	$updates = get_core_updates();
+	$current = ! empty( $updates[0] ) ? $updates[0] : null;
+
+	if ( ! $current ) {
+		wp_send_json_error( array( 'message' => __( 'No updates available' ) ), 400 );
+	}
+
 	$upgrader = new Core_Upgrader();
-	$result = $upgrader->upgrade( 'wordpress' );
+	$result = $upgrader->upgrade( $current );
 
 	if ( is_wp_error( $result ) ) {
 		wp_send_json_error( array( 'message' => $result->get_error_message() ), 500 );
@@ -246,7 +254,7 @@ function wp_ajax_do_core_update() {
 	wp_send_json_success(
 		array(
 			'message'  => __( 'Core updated successfully' ),
-			'version'  => isset( $result['new_version'] ) ? $result['new_version'] : '',
+			'version'  => isset( $current->current ) ? $current->current : '',
 			'redirect' => add_query_arg( 'update', 'success' ),
 		)
 	);
