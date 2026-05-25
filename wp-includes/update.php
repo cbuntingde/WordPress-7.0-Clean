@@ -2,6 +2,8 @@
 /**
  * A simple set of functions to check the WordPress.org Version Update service.
  *
+ * For this forked version, checks GitHub releases instead of wordpress.org.
+ *
  * @package WordPress
  * @since 2.3.0
  */
@@ -9,6 +11,73 @@
 // Don't load directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	die( '-1' );
+}
+
+/**
+ * Check GitHub for new releases (fork-specific).
+ *
+ * @since 7.0.1
+ *
+ * @return array|null Release data or null on failure.
+ */
+function wp_check_github_core_update() {
+	$cached = get_site_transient( 'wp_github_core_release' );
+	if ( false !== $cached ) {
+		return $cached;
+	}
+
+	$response = wp_remote_get(
+		'https://api.github.com/repos/cbuntingde/WordPress-7.0-Clean/releases/latest',
+		array(
+			'headers' => array(
+				'Accept'               => 'application/vnd.github+json',
+				'User-Agent'          => 'WordPress-7.0-Clean',
+				'X-GitHub-Api-Version' => '2022-11-28',
+			),
+		)
+	);
+
+	if ( is_wp_error( $response ) ) {
+		return null;
+	}
+
+	$code = wp_remote_retrieve_response_code( $response );
+	if ( 200 !== $code ) {
+		return null;
+	}
+
+	$data = json_decode( wp_remote_retrieve_body( $response ), true );
+	if ( ! $data || empty( $data['tag_name'] ) ) {
+		return null;
+	}
+
+	// Find .zip asset
+	$download_url = '';
+	if ( ! empty( $data['assets'] ) ) {
+		foreach ( $data['assets'] as $asset ) {
+			if ( substr( $asset['name'], -4 ) === '.zip' ) {
+				$download_url = $asset['browser_download_url'];
+				break;
+			}
+		}
+	}
+
+	// Fallback to source zipball
+	if ( ! $download_url ) {
+		$download_url = $data['zipball_url'] ?? '';
+	}
+
+	$result = array(
+		'version'  => ltrim( $data['tag_name'], 'v' ),
+		'download' => $download_url,
+		'body'    => $data['body'] ?? '',
+		'url'     => $data['html_url'] ?? '',
+		'date'    => $data['published_at'] ?? '',
+	);
+
+	set_site_transient( 'wp_github_core_release', $result, HOUR_IN_SECONDS );
+
+	return $result;
 }
 
 /**
@@ -317,6 +386,33 @@ function wp_version_check( $extra_stats = array(), $force_check = false ) {
 	}
 
 	set_site_transient( 'update_core', $updates );
+
+	// Fork-specific: Override with GitHub release if newer.
+	$release = wp_check_github_core_update();
+	if ( $release ) {
+		$local = wp_get_wp_version();
+		if ( version_compare( $local, $release['version'], '<' ) ) {
+			$updates->updates[] = (object) array(
+				'response'      => 'upgrade',
+				'download'     => $release['download'],
+				'locale'       => 'en_US',
+				'packages'    => (object) array(
+					'full'        => $release['download'],
+					'new_bundled' => '',
+					'partial'    => '',
+					'rollback'   => '',
+					'no_content' => '',
+				),
+				'current'     => $release['version'],
+				'version'    => $release['version'],
+				'php_version'   => '8.5',
+				'mysql_version' => '8.0',
+				'new_bundled'   => '8.5',
+				'new_files'     => false,
+			);
+			set_site_transient( 'update_core', $updates );
+		}
+	}
 
 	if ( ! empty( $body['ttl'] ) ) {
 		$ttl = (int) $body['ttl'];
