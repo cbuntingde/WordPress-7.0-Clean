@@ -474,7 +474,7 @@ function core_upgrade_preamble() {
 				</button>
 			<?php endif; ?>
 
-			<?php if ( current_user_can( 'update_core' ) : ?>
+			<?php if ( current_user_can( 'update_core' ) ) : ?>
 				<input type="hidden" name="action" value="do-core-backup" />
 				<button type="submit" class="button" id="core-backup-btn">
 					<?php _e( 'Create Backup' ); ?>
