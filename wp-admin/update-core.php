@@ -34,31 +34,34 @@ add_action( 'admin_footer', function() {
 		var $loadingOverlay = $('#core-update-loading');
 		var $loadingTitle = $('#loading-title');
 		var $loadingMessage = $('#loading-message');
-		var $progressBar = $('#core-update-progress-bar');
 
 		function showLoading(title, message) {
 			$loadingTitle.text(title);
 			$loadingMessage.text(message);
 			$loadingOverlay.css('display', 'block');
-			$('#core-update-progress').css('display', 'block');
 		}
 
 		function hideLoading() {
 			$loadingOverlay.css('display', 'none');
-			$('#core-update-progress').css('display', 'none');
 		}
 
-		function updateProgress(percent, message) {
-			$progressBar.css('width', percent + '%');
-			if (message) {
-				$loadingMessage.text(message);
+		function showInlineMessage(msg, isError) {
+			$('.inline-status').remove();
+			var $div = $('<div class="inline-status notice" style="margin:12px 0;padding:12px;border-radius:4px;"></div>');
+			if (isError) {
+				$div.css('background', '#fef7f1').css('color', '#b62307')
+					.html('<strong>Error:</strong> ' + msg);
+			} else {
+				$div.css('background', '#f0fdf4').css('color', '#2a9b6f')
+					.html('<strong>Success:</strong> ' + msg);
 			}
+			$('.card-actions').before($div);
 		}
 
-		// Update Now button - AJAX to admin-ajax.php
+		// Update Now button
 		$('#core-update-btn').on('click', function(){
 			var $btn = $(this);
-			$btn.prop('disabled', true);
+			$btn.prop('disabled', true).text('Updating...');
 			showLoading('Updating WordPress', 'Starting update...');
 
 			$.ajax({
@@ -69,27 +72,31 @@ add_action( 'admin_footer', function() {
 					_wpnonce: wpUpdatesApi.nonce.core_update
 				},
 				success: function(response) {
-					if (response.success) {
-						updateProgress(100, 'Update complete!');
-						window.location.href = response.data.redirect || '<?php echo esc_url( self_admin_url( 'about.php?updated' ) ); ?>';
+					hideLoading();
+					if (response && response.success) {
+						showInlineMessage(response.data && response.data.message ? response.data.message : 'Update complete!');
+						$btn.text('Updated').prop('disabled', true);
+						if (response.data && response.data.redirect) {
+							window.location.href = response.data.redirect;
+						}
 					} else {
-						alert(response.data.message || 'Update failed.');
-						hideLoading();
-						$btn.prop('disabled', false);
+						var msg = (response && response.data && response.data.message) ? response.data.message : 'Update failed.';
+						showInlineMessage(msg, true);
+						$btn.prop('disabled', false).text('Update Now');
 					}
 				},
 				error: function(xhr, status, error) {
-					alert('Update failed: ' + error);
 					hideLoading();
-					$btn.prop('disabled', false);
+					showInlineMessage('Connection error: ' + (error || 'Failed'), true);
+					$btn.prop('disabled', false).text('Update Now');
 				}
 			});
 		});
 
-		// Create Backup button - AJAX to admin-ajax.php
+		// Create Backup button
 		$('#core-backup-btn').on('click', function(){
 			var $btn = $(this);
-			$btn.prop('disabled', true);
+			$btn.prop('disabled', true).text('Creating...');
 			showLoading('Creating Backup', 'Initializing backup...');
 
 			$.ajax({
@@ -100,22 +107,20 @@ add_action( 'admin_footer', function() {
 					_wpnonce: wpUpdatesApi.nonce.core_backup
 				},
 				success: function(response) {
-					if (response.success) {
-						updateProgress(100, 'Backup complete!');
-						alert('Backup created successfully!');
-						hideLoading();
-						$btn.prop('disabled', false);
-						window.location.reload();
+					hideLoading();
+					if (response && response.success) {
+						showInlineMessage(response.data && response.data.message ? response.data.message : 'Backup complete!');
+						$btn.text('Backup Created').prop('disabled', true);
 					} else {
-						alert(response.data.message || 'Backup failed.');
-						hideLoading();
-						$btn.prop('disabled', false);
+						var msg = (response && response.data && response.data.message) ? response.data.message : 'Backup failed.';
+						showInlineMessage(msg, true);
+						$btn.prop('disabled', false).text('Create Backup');
 					}
 				},
 				error: function(xhr, status, error) {
-					alert('Backup failed: ' + error);
 					hideLoading();
-					$btn.prop('disabled', false);
+					showInlineMessage('Connection error: ' + (error || 'Failed'), true);
+					$btn.prop('disabled', false).text('Create Backup');
 				}
 			});
 		});
