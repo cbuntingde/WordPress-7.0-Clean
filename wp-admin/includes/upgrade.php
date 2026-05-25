@@ -890,6 +890,11 @@ function upgrade_all() {
 		upgrade_700();
 	}
 
+	// Fork-specific: upgrade to 8.0 schema (WordPress-7.0-Clean)
+	if ( $wp_current_db_version < 80000 ) {
+		upgrade_800();
+	}
+
 	maybe_disable_link_manager();
 
 	maybe_disable_automattic_widgets();
@@ -2508,6 +2513,48 @@ function upgrade_700() {
 			)
 		);
 	}
+}
+
+/**
+ * Execute database upgrades for version 8.0 (fork-specific for WordPress-7.0-Clean).
+ *
+ * @since 7.0.1
+ *
+ * @global int $wp_current_db_version The old (current) database version.
+ * @global wpdb $wpdb WordPress database abstraction object.
+ */
+function upgrade_800() {
+	global $wp_current_db_version, $wpdb;
+
+	// Expand wp_options.option_name from 191 to 255.
+	$wpdb->query(
+		"ALTER TABLE $wpdb->options MODIFY option_name VARCHAR(255) NOT NULL DEFAULT ''"
+	);
+
+	// Change wp_options.autoload from VARCHAR to ENUM.
+	$wpdb->query(
+		"ALTER TABLE $wpdb->options MODIFY autoload ENUM('yes','no') NOT NULL DEFAULT 'yes'"
+	);
+
+	// Add composite index on (option_name, autoload) for query optimization.
+	$wpdb->query(
+		"ALTER TABLE $wpdb->options ADD KEY option_name_autoload (option_name, autoload)"
+	);
+
+	// Expand wp_posts.post_name from 200 to 255.
+	$wpdb->query(
+		"ALTER TABLE $wpdb->posts MODIFY post_name VARCHAR(255) NOT NULL DEFAULT ''"
+	);
+
+	// Add index on (post_modified, ID) for sorting queries.
+	$wpdb->query(
+		"ALTER TABLE $wpdb->posts ADD KEY post_modified (post_modified, ID)"
+	);
+
+	// Add index on (post_type, post_name) for pretty permalinks.
+	$wpdb->query(
+		"ALTER TABLE $wpdb->posts ADD KEY post_type_name (post_type, post_name)"
+	);
 }
 
 /**
