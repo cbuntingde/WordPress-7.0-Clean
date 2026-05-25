@@ -1,6 +1,6 @@
 # WordPress (Fork) Modernized Core
 
-WordPress has accumulated decades of backward compatibility code to support PHP versions from 5.6 through 8.x. This creates unnecessary overhead: polyfill functions that duplicate native PHP features, version checks scattered throughout the codebase, entire subsystems for protocols replaced by modern APIs, and legacy database workarounds for MySQL versions that reached end-of-life years ago. The codebase became difficult to audit, slower than necessary, and filled with code paths that no longer served any real purpose.
+This fork focuses on modernizing WordPress by removing legacy compatibility code. Based on WordPress 7.0, it strips away decades of polyfills and version checks that supported PHP 5.6-8.x, leaving only what's needed for PHP 8.5+ and MySQL 8.0+.
 
 This project strips all of that away by requiring PHP 8.5+ and MySQL 8.0.0+. The result is cleaner code, fewer files to audit, faster execution, and a codebase that takes advantage of modern PHP features without conditional logic everywhere.
 
