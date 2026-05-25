@@ -145,7 +145,7 @@ This project strips all of that away by requiring PHP 8.5+ and MySQL 8.0.0+. The
 ## Setup
 
 ```bash
-docker compose up -d --build
+cd docker && docker compose up -d --build
 ```
 
 Access at http://localhost:8090 (admin / admin123)
