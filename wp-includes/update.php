@@ -392,7 +392,8 @@ function wp_version_check( $extra_stats = array(), $force_check = false ) {
 	if ( $release ) {
 		$local = wp_get_wp_version();
 		if ( version_compare( $local, $release['version'], '<' ) ) {
-			$updates->updates[] = (object) array(
+			$updates->updates = array(
+			(object) array(
 				'response'      => 'upgrade',
 				'download'     => $release['download'],
 				'locale'       => 'en_US',
@@ -409,7 +410,8 @@ function wp_version_check( $extra_stats = array(), $force_check = false ) {
 				'mysql_version' => '8.0',
 				'new_bundled'   => '8.5',
 				'new_files'     => false,
-			);
+			)
+		) + $updates->updates;
 			set_site_transient( 'update_core', $updates );
 		}
 	}
