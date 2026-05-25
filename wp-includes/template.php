@@ -702,7 +702,6 @@ function wp_set_template_globals() {
  * Retrieves the name of the highest priority template file that exists.
  *
  * Searches in the stylesheet directory before the template directory and
- * wp-includes/theme-compat so that themes which inherit from a parent theme
  * can just overload one file.
  *
  * @since 2.7.0
@@ -739,8 +738,6 @@ function locate_template( $template_names, $load = false, $load_once = true, $ar
 		} elseif ( $is_child_theme && file_exists( $wp_template_path . '/' . $template_name ) ) {
 			$located = $wp_template_path . '/' . $template_name;
 			break;
-		} elseif ( file_exists( ABSPATH . WPINC . '/theme-compat/' . $template_name ) ) {
-			$located = ABSPATH . WPINC . '/theme-compat/' . $template_name;
 			break;
 		}
 	}

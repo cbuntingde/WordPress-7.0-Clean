@@ -9,8 +9,5 @@
  * @access private
  */
 
-// sodium_crypto_box() requires libsodium extension.
-// If not available, load sodium_compat polyfill.
-if ( ! function_exists( 'sodium_crypto_box' ) ) {
-	require ABSPATH . WPINC . '/sodium_compat/autoload.php';
-}
+// PHP 8.5 has native sodium extension - no polyfill needed.
+// Previous sodium_compat polyfill has been removed.

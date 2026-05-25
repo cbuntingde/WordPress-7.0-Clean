@@ -1625,8 +1625,6 @@ function comments_template( $file = '/comments.php', $separate_comments = false 
 		require $include;
 	} elseif ( file_exists( trailingslashit( $wp_template_path ) . $file ) ) {
 		require trailingslashit( $wp_template_path ) . $file;
-	} else { // Backward compat code will be removed in a future release.
-		require ABSPATH . WPINC . '/theme-compat/comments.php';
 	}
 }
 
