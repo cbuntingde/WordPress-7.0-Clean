@@ -14,6 +14,121 @@ wp_enqueue_script( 'plugin-install' );
 wp_enqueue_script( 'updates' );
 add_thickbox();
 
+// Fork-specific: AJAX handlers for core update and backup operations.
+add_action( 'admin_footer', function() {
+	// Localize nonces for AJAX operations.
+	wp_add_inline_script( 'updates', 'var wpUpdatesApi = wpUpdatesApi || {}; wpUpdatesApi.nonce = ' . wp_json_encode( array(
+		'core_update' => wp_create_nonce( 'core_update_nonce' ),
+		'core_backup' => wp_create_nonce( 'core_backup_nonce' ),
+	) ) . ';' , 'before' );
+	?>
+	<div id="core-update-loading" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);z-index:99999;">
+		<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;padding:40px;border-radius:12px;text-align:center;max-width:400px;width:90%">
+			<span class="spinner" style="float:none;margin:0 auto 20px;width:40px;height:40px;border-width:4px"></span>
+			<h2 style="margin:0 0 10px" id="loading-title">Processing...</h2>
+			<p style="margin:0;color:#666" id="loading-message">Please wait...</p>
+		</div>
+	</div>
+	<script>
+	jQuery(document).ready(function($){
+		var $loadingOverlay = $('#core-update-loading');
+		var $loadingTitle = $('#loading-title');
+		var $loadingMessage = $('#loading-message');
+
+		function showLoading(title, message) {
+			$loadingTitle.text(title);
+			$loadingMessage.text(message);
+			$loadingOverlay.css('display', 'block');
+		}
+
+		function hideLoading() {
+			$loadingOverlay.css('display', 'none');
+		}
+
+		function showInlineMessage(msg, isError) {
+			$('.inline-status').remove();
+			var $div = $('<div class="inline-status notice" style="margin:12px 0;padding:12px;border-radius:4px;"></div>');
+			if (isError) {
+				$div.css('background', '#fef7f1').css('color', '#b62307')
+					.html('<strong>Error:</strong> ' + msg);
+			} else {
+				$div.css('background', '#f0fdf4').css('color', '#2a9b6f')
+					.html('<strong>Success:</strong> ' + msg);
+			}
+			$('.core-update-actions').before($div);
+		}
+
+		// Update Now button
+		$('#core-update-btn').on('click', function(){
+			var $btn = $(this);
+			$btn.prop('disabled', true).text('Updating...');
+			showLoading('Updating WordPress', 'Starting update...');
+
+			$.ajax({
+				url: ajaxurl,
+				type: 'POST',
+				data: {
+					action: 'do_core_update',
+					_wpnonce: wpUpdatesApi.nonce.core_update
+				},
+				success: function(response) {
+					hideLoading();
+					if (response && response.success) {
+						showInlineMessage(response.data && response.data.message ? response.data.message : 'Update complete!');
+						$btn.text('Updated').prop('disabled', true);
+						if (response.data && response.data.redirect) {
+							window.location.href = response.data.redirect;
+						}
+					} else {
+						var msg = (response && response.data && response.data.message) ? response.data.message : 'Update failed.';
+						showInlineMessage(msg, true);
+						$btn.prop('disabled', false).text('Update Now');
+					}
+				},
+				error: function(xhr, status, error) {
+					hideLoading();
+					showInlineMessage('Connection error: ' + (error || 'Failed'), true);
+					$btn.prop('disabled', false).text('Update Now');
+				}
+			});
+		});
+
+		// Create Backup button
+		$('#core-backup-btn').on('click', function(){
+			var $btn = $(this);
+			$btn.prop('disabled', true).text('Creating...');
+			showLoading('Creating Backup', 'Initializing backup...');
+
+			$.ajax({
+				url: ajaxurl,
+				type: 'POST',
+				data: {
+					action: 'do_core_backup',
+					_wpnonce: wpUpdatesApi.nonce.core_backup
+				},
+				success: function(response) {
+					hideLoading();
+					if (response && response.success) {
+						showInlineMessage(response.data && response.data.message ? response.data.message : 'Backup complete!');
+						$btn.text('Backup Created').prop('disabled', true);
+					} else {
+						var msg = (response && response.data && response.data.message) ? response.data.message : 'Backup failed.';
+						showInlineMessage(msg, true);
+						$btn.prop('disabled', false).text('Create Backup');
+					}
+				},
+				error: function(xhr, status, error) {
+					hideLoading();
+					showInlineMessage('Connection error: ' + (error || 'Failed'), true);
+					$btn.prop('disabled', false).text('Create Backup');
+				}
+			});
+		});
+	});
+	</script>
+	<?php
+});
+
 if ( is_multisite() && ! is_network_admin() ) {
 	wp_redirect( network_admin_url( 'update-core.php' ) );
 	exit;
@@ -156,7 +271,7 @@ function list_core_update( $update ) {
 	echo $message;
 	echo '</p>';
 
-	echo '<form method="post" action="' . esc_url( $form_action ) . '" name="upgrade" class="upgrade">';
+	echo '<form method="post" action="' . esc_url( $form_action ) . '" name="upgrade" class="upgrade" id="core-upgrade-form">';
 	wp_nonce_field( 'upgrade-core' );
 
 	echo '<p>';
@@ -243,75 +358,153 @@ function dismissed_updates() {
  * @since 2.7.0
  */
 function core_upgrade_preamble() {
-	$updates = get_core_updates();
-
 	// Include an unmodified $wp_version.
 	require ABSPATH . WPINC . '/version.php';
 
-	$is_development_version = preg_match( '/alpha|beta|RC/', $wp_version );
+	$current_version = wp_get_wp_version();
+	$is_development = preg_match( '/alpha|beta|RC/', $wp_version );
 
-	if ( isset( $updates[0]->version ) && version_compare( $updates[0]->version, $wp_version, '>' ) ) {
-		echo '<h2 class="response">';
-		_e( 'An updated version of WordPress is available.' );
-		echo '</h2>';
+	// Get latest version from GitHub.
+	require_once ABSPATH . 'wp-admin/includes/class-core-upgrader.php';
+	$latest_version = Core_Upgrader::get_latest_github_version();
+	$has_update    = $latest_version && version_compare( $latest_version, $current_version, '>' );
 
-		$message = sprintf(
-			/* translators: 1: Documentation on WordPress backups, 2: Documentation on updating WordPress. */
-			__( '<strong>Important:</strong> Before updating, please <a href="%1$s">back up your database and files</a>. For help with updates, visit the <a href="%2$s">Updating WordPress</a> documentation page.' ),
-			__( 'https://developer.wordpress.org/advanced-administration/security/backup/' ),
-			__( 'https://wordpress.org/documentation/article/updating-wordpress/' )
-		);
-		wp_admin_notice(
-			$message,
-			array(
-				'type'               => 'warning',
-				'additional_classes' => array( 'inline' ),
-			)
-		);
+	// Check for available rollback backups.
+	$backup_info = Core_Upgrader::get_available_backups();
 
-		// Check for available rollback backups from our fork.
-		require_once ABSPATH . 'wp-admin/includes/class-core-upgrader.php';
-		$backup_info = Core_Upgrader::get_available_backups();
-		if ( $backup_info ) {
-			$rollback_url = wp_nonce_url( self_admin_url( 'update-core.php?action=do-rollback' ), 'rollback-core' );
-			$rollback_msg = sprintf(
-				__( 'A backup is available from version %1$s. You can <a href="%2$s">roll back to this version</a> if the update causes issues.' ),
-				esc_html( $backup_info['version'] ),
-				esc_url( $rollback_url )
-			);
-			wp_admin_notice(
-				$rollback_msg,
-				array(
-					'type'               => 'info',
-					'additional_classes' => array( 'inline' ),
-				)
-			);
-		}
-	} elseif ( $is_development_version ) {
-		echo '<h2 class="response">' . __( 'You are using a development version of WordPress.' ) . '</h2>';
+	// Determine status message.
+	if ( $is_development ) {
+		$status_message = __( 'You are using a development version of WordPress.' );
+	} elseif ( $has_update ) {
+		$status_message = __( 'An updated version of WordPress is available.' );
 	} else {
-		echo '<h2 class="response">' . __( 'You have the latest version of WordPress.' ) . '</h2>';
+		$status_message = __( 'You have the latest version of WordPress.' );
 	}
 
-	echo '<ul class="core-updates">';
-	foreach ( (array) $updates as $update ) {
-		echo '<li>';
-		list_core_update( $update );
-		echo '</li>';
-	}
-	echo '</ul>';
+	// Determine which actions to show.
+	$can_update = current_user_can( 'update_core' ) && $has_update;
 
-	// Don't show the maintenance mode notice when we are only showing a single re-install option.
-	if ( $updates && ( count( $updates ) > 1 || 'latest' !== $updates[0]->response ) ) {
+	?>
+	<style>
+	.core-update-card {
+		background: #fff;
+		border: 1px solid #dcdcde;
+		border-radius: 8px;
+		padding: 16px;
+		margin-bottom: 24px;
+	}
+	.core-update-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 12px;
+	}
+	.core-update-title {
+		font-size: 18px;
+		font-weight: 600;
+		margin: 0;
+	}
+	.core-update-version {
+		font-size: 14px;
+		color: #646970;
+	}
+	.core-update-version strong {
+		color: #2271b1;
+	}
+	.core-update-actions {
+		display: flex;
+		gap: 12px;
+		margin-top: 16px;
+	}
+	.core-update-progress {
+		height: 8px;
+		background: #dcdcde;
+		border-radius: 4px;
+		margin-top: 16px;
+		overflow: hidden;
+		display: none;
+	}
+	.core-update-progress-bar {
+		height: 100%;
+		background: #2271b1;
+		width: 0%;
+		transition: width 0.3s ease;
+	}
+	.core-backup-notice {
+		margin-top: 24px;
+		padding-top: 16px;
+		border-top: 1px solid #dcdcde;
+	}
+	</style>
+
+	<div class="core-update-card">
+		<div class="core-update-header">
+			<h2 class="core-update-title"><?php echo esc_html( $status_message ); ?></h2>
+		</div>
+
+		<p class="core-update-version">
+			<?php
+			printf(
+				/* translators: 1: Current version, 2: Latest version */
+				__( 'Current version: %1$s' ),
+				'<strong>' . esc_html( $current_version ) . '</strong>'
+			);
+			if ( $latest_version ) {
+				echo ' | ';
+				printf(
+					/* translators: Latest version from GitHub */
+					__( 'Latest version: %s' ),
+					'<strong>' . esc_html( $latest_version ) . '</strong>'
+				);
+			}
+			?>
+		</p>
+
+		<div class="core-update-progress" id="core-update-progress">
+			<div class="core-update-progress-bar" id="core-update-progress-bar"></div>
+		</div>
+
+		<form method="post" action="<?php echo esc_url( self_admin_url( 'update-core.php' ) ); ?>" class="core-update-actions" style="display:flex;gap:12px;">
+			<?php wp_nonce_field( 'upgrade-core' ); ?>
+			<?php if ( $can_update ) : ?>
+				<input type="hidden" name="action" value="do-core-upgrade" />
+				<input type="hidden" name="version" value="<?php echo esc_attr( $latest_version ); ?>" />
+				<button type="submit" class="button button-primary" id="core-update-btn">
+					<?php _e( 'Update Now' ); ?>
+				</button>
+			<?php endif; ?>
+
+			<?php if ( current_user_can( 'update_core' ) ) : ?>
+				<input type="hidden" name="action" value="do-core-backup" />
+				<button type="submit" class="button" id="core-backup-btn">
+					<?php _e( 'Create Backup' ); ?>
+				</button>
+			<?php endif; ?>
+		</form>
+
+		<?php if ( $backup_info ) : ?>
+			<div class="core-backup-notice">
+				<p>
+					<?php
+					printf(
+						__( 'A backup from version %1$s is available. ' ),
+						esc_html( $backup_info['version'] )
+					);
+					$rollback_url = wp_nonce_url( self_admin_url( 'update-core.php?action=do-rollback' ), 'rollback-core' );
+					printf(
+						'<a href="%s">Roll back to this version</a>.',
+						esc_url( $rollback_url )
+					);
+					?>
+				</p>
+			</div>
+		<?php endif; ?>
+	</div>
+
+	<?php
+	// Maintenance mode notice only shows when there's an update.
+	if ( $has_update ) {
 		echo '<p>' . __( 'While your site is being updated, it will be in maintenance mode. As soon as your updates are complete, this mode will be deactivated.' ) . '</p>';
-	} elseif ( ! $updates ) {
-		list( $normalized_version ) = explode( '-', $wp_version );
-		echo '<p>' . sprintf(
-			/* translators: 1: URL to About screen, 2: WordPress version. */
-			__( '<a href="%1$s">Learn more about WordPress %2$s</a>.' ),
-			esc_url( self_admin_url( 'about.php' ) ),
-			$normalized_version
-		) . '</p>';
 	}
 
 	dismissed_updates();
@@ -512,7 +705,7 @@ function list_plugin_updates() {
 <p><?php _e( 'The following plugins have new versions available. Check the ones you want to update and then click &#8220;Update Plugins&#8221;.' ); ?></p>
 <form method="post" action="<?php echo esc_url( $form_action ); ?>" name="upgrade-plugins" class="upgrade">
 	<?php wp_nonce_field( 'upgrade-core' ); ?>
-<p><input id="upgrade-plugins" class="button" type="submit" value="<?php esc_attr_e( 'Update Plugins' ); ?>" name="upgrade" /></p>
+<p><input id="upgrade-plugins" class="button" type="button" value="<?php esc_attr_e( 'Update Plugins' ); ?>" name="upgrade" /></p>
 <table class="widefat updates-table" id="update-plugins-table">
 	<thead>
 	<tr>
@@ -645,7 +838,7 @@ function list_plugin_updates() {
 	</tr>
 	</tfoot>
 </table>
-<p><input id="upgrade-plugins-2" class="button" type="submit" value="<?php esc_attr_e( 'Update Plugins' ); ?>" name="upgrade" /></p>
+<p><input id="upgrade-plugins-2" class="button" type="button" value="<?php esc_attr_e( 'Update Plugins' ); ?>" name="upgrade" /></p>
 </form>
 	<?php
 }
@@ -688,7 +881,7 @@ function list_theme_updates() {
 </p>
 <form method="post" action="<?php echo esc_url( $form_action ); ?>" name="upgrade-themes" class="upgrade">
 	<?php wp_nonce_field( 'upgrade-core' ); ?>
-<p><input id="upgrade-themes" class="button" type="submit" value="<?php esc_attr_e( 'Update Themes' ); ?>" name="upgrade" /></p>
+<p><input id="upgrade-themes" class="button" type="button" value="<?php esc_attr_e( 'Update Themes' ); ?>" name="upgrade" /></p>
 <table class="widefat updates-table" id="update-themes-table">
 	<thead>
 	<tr>
@@ -821,7 +1014,7 @@ function list_theme_updates() {
 	</tr>
 	</tfoot>
 </table>
-<p><input id="upgrade-themes-2" class="button" type="submit" value="<?php esc_attr_e( 'Update Themes' ); ?>" name="upgrade" /></p>
+<p><input id="upgrade-themes-2" class="button" type="button" value="<?php esc_attr_e( 'Update Themes' ); ?>" name="upgrade" /></p>
 </form>
 	<?php
 }
@@ -847,7 +1040,7 @@ function list_translation_updates() {
 	<form method="post" action="<?php echo esc_url( $form_action ); ?>" name="upgrade-translations" class="upgrade">
 		<p><?php _e( 'New translations are available.' ); ?></p>
 		<?php wp_nonce_field( 'upgrade-translations' ); ?>
-		<p><input class="button" type="submit" value="<?php esc_attr_e( 'Update Translations' ); ?>" name="upgrade" /></p>
+		<p><input class="button" type="button" value="<?php esc_attr_e( 'Update Translations' ); ?>" name="upgrade" /></p>
 	</form>
 	<?php
 }
@@ -1000,6 +1193,17 @@ $action = $_GET['action'] ?? 'upgrade-core';
 if ( ! empty( $_GET['rollback'] ) && 'success' === $_GET['rollback'] ) {
 	wp_admin_notice(
 		__( 'WordPress has been rolled back to the previous version.' ),
+		array(
+			'type'               => 'success',
+			'additional_classes' => array( 'inline' ),
+		)
+	);
+}
+
+// Handle backup success message.
+if ( ! empty( $_GET['backup'] ) && 'success' === $_GET['backup'] ) {
+	wp_admin_notice(
+		__( 'A backup of your WordPress files has been created. You can use it to roll back if needed.' ),
 		array(
 			'type'               => 'success',
 			'additional_classes' => array( 'inline' ),
@@ -1214,6 +1418,72 @@ if ( 'upgrade-core' === $action ) {
 	);
 
 	require_once ABSPATH . 'wp-admin/admin-footer.php';
+
+} elseif ( 'do-core-backup' === $action ) {
+
+	if ( ! current_user_can( 'update_core' ) ) {
+		wp_die( __( 'Sorry, you are not allowed to update this site.' ) );
+	}
+
+	check_admin_referer( 'backup-core' );
+
+	// Fork-specific: Stream output directly to show progress.
+	header( 'Content-Type: text/html; charset=' . get_option( 'blog_charset' ) );
+	header( 'X-Accel-Buffering: no' );
+
+	// Start output buffer to show progress.
+	ob_implicit_flush( 1 );
+	ob_end_flush();
+
+	echo '<!DOCTYPE html><html><head>';
+	echo '<meta name="viewport" content="width=device-width, initial-scale=1">';
+	echo '<style>body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;margin:40px auto;max-width:600px;padding:20px;background:#f0f0f1}.progress{background:#fff;border-radius:8px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.1)}.spinner{border:3px solid #e0e0e0;border-top-color:#2271b1;border-radius:50%;width:24px;height:24px;animation:spin 1s linear infinite;display:inline-block;vertical-align:middle;margin-right:10px}@keyframes spin{to{transform:rotate(360deg)}}h2{margin-top:0;color:#1d2327}.message{padding:10px 15px;margin:5px 0;background:#f6f7f7;border-left:3px solid #2271b1}.success{border-left-color:#2a9b6f}.error{border-left-color:#d63638}a{color:#2271b1;text-decoration:none}</style>';
+	echo '</head><body>';
+	echo '<div class="progress">';
+	echo '<h2><span class="spinner"></span>Creating Backup...</h2>';
+	echo '<p class="message">This may take a few minutes depending on your site size.</p>';
+	echo '<p id="log"></p>';
+	echo '</div>';
+	echo '<script>window.onload=function(){document.getElementById("log").textContent="Initializing backup..."}</script>';
+	flush();
+
+	require_once ABSPATH . 'wp-admin/includes/file.php';
+	require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+	require_once ABSPATH . 'wp-admin/includes/class-core-upgrader.php';
+
+	// Flush credentials requests - use direct filesystem.
+	ob_start();
+	$credentials = request_filesystem_credentials( '', '', false, ABSPATH );
+	ob_end_clean();
+
+	if ( ! $credentials ) {
+		echo '<p class="message error">Failed to access filesystem. Please check your FTP/SSH credentials.</p></body></html>';
+		exit();
+	}
+
+	if ( ! WP_Filesystem( $credentials, ABSPATH ) ) {
+		echo '<p class="message error">Failed to connect to filesystem.</p></body></html>';
+		exit();
+	}
+
+	global $wp_filesystem;
+	echo '<script>document.getElementById("log").textContent="Connected to filesystem, starting backup..."</script>';
+	flush();
+
+	$upgrader = new Core_Upgrader();
+	$result   = $upgrader->create_backup_before_update();
+
+	if ( is_wp_error( $result ) ) {
+		echo '<p class="message error">' . esc_html( $result->get_error_message() ) . '</p>';
+		echo '</div></body></html>';
+		exit();
+	}
+
+	echo '<p class="message success">Backup created successfully!</p>';
+	echo '<p><a href="' . esc_url( self_admin_url( 'update-core.php' ) ) . '">Return to Updates page</a></p>';
+	echo '<script>window.location="?backup=success"</script>';
+	echo '</div></body></html>';
+	exit();
 
 } elseif ( 'do-rollback' === $action ) {
 
