@@ -12,7 +12,7 @@ services:
       - wp_network
 
   wp_php:
-    build: ./docker/php
+    build: ./php
     volumes:
       - .:/var/www/html
     networks:
@@ -21,7 +21,7 @@ services:
       - wp_mariadb
 
   wp_nginx:
-    build: ./docker/nginx
+    build: ./nginx
     ports:
       - "8090:80"
     volumes:
