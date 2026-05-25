@@ -19,6 +19,9 @@ This fork modernizes WordPress by removing legacy compatibility code. Based on W
 
 ## Latest Changes
 
+- Removed theme-compat fallback templates (themes now must provide all required template files)
+- Removed spl-autoload-compat.php (never loaded)
+- Stripped compat.php (sodium polyfill no longer needed)
 - Added core rollback capability — creates backup before update, provides restore UI
 - Modified wp-includes/update.php to check GitHub releases
 - Added upgrade_800() migration for existing installs (MySQL 8.0+ schema)
@@ -126,11 +129,12 @@ This fork modernizes WordPress by removing legacy compatibility code. Based on W
 - Removed PHP 8.0/8.1 MariaDB version workaround
 - Removed PHP 8.0 imagedestroy() conditionals
 - Removed PHP 7.0/8.0 font mime type checks
+- Removed theme-compat fallback templates (9 files)
 
 ## Code Reduction Summary
 
-- Files deleted: 31+
-- Lines removed: 26,900+
+- Files deleted: 121+
+- Lines removed: 38,655+
 - Functions removed: 11
 - Functions deprecated with migration path: 7
 - Database indexes added: 5
