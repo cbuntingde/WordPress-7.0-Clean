@@ -246,40 +246,66 @@ class GitHub_Core_Updater {
 	 */
 	public function render_settings_page() {
 		$status = $this->get_status();
+		?>
+		<div class="wrap">
+			<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
 
-		echo '<div class="wrap">';
-		echo '<h1>GitHub Core Updater</h1>';
+			<?php if ( ! empty( $_GET['updated'] ) ) : ?>
+				<?php $error = get_transient( 'wp_github_update_error' ); ?>
+				<?php if ( $_GET['updated'] === '1' && ! $error ) : ?>
+					<div class="notice notice-success is-dismissible"><p>Core updated successfully!</p></div>
+				<?php elseif ( $error ) : ?>
+					<div class="notice notice-error is-dismissible"><p>Update failed: <?php echo esc_html( $error ); ?></p></div>
+				<?php endif; ?>
+			<?php endif; ?>
 
-		if ( ! empty( $_GET['updated'] ) ) {
-			$error = get_transient( 'wp_github_update_error' );
-			if ( $_GET['updated'] === '1' && ! $error ) {
-				echo '<div class="notice notice-success"><p>Core updated successfully!</p></div>';
-			} elseif ( $error ) {
-				echo '<div class="notice notice-error"><p>Update failed: ' . esc_html( $error ) . '</p></div>';
-			}
-		}
-
-		echo '<table class="form-table">';
-		echo '<tr><th>Current Version</th><td>' . esc_html( $status['local'] ) . '</td></tr>';
-
-		if ( $status['available'] ) {
-			echo '<tr><th>Available Version</th><td><strong>' . esc_html( $status['remote'] ) . '</strong></td></tr>';
-			echo '<tr><th>Release Notes</th><td>' . nl2br( esc_html( substr( $status['release']['body'], 0, 2000 ) ) ) . '</td></tr>';
-
-			echo '<tr><th>Action</th><td>';
-			echo '<a href="' . wp_nonce_url( admin_url( 'options-general.php?page=github-core-updater&action=update_now' ), 'github-core-update' ) . '" class="button button-primary">Update Now</a>';
-			echo '</td></tr>';
-		} else {
-			echo '<tr><th>Status</th><td><span class="notice notice-success">You are up to date!</span></td></tr>';
-		}
-
-		echo '<tr><th>Auto-Update</th><td>';
-		echo '<label><input type="checkbox" name="github_core_auto_update" value="1" ' . checked( get_option( 'github_core_auto_update', false ), true, false ) . '> Enable automatic updates</label>';
-		echo '<p class="description">Automatically download and install new releases from GitHub.</p>';
-		echo '</td></tr>';
-
-		echo '</table>';
-		echo '</div>';
+			<form method="post" action="<?php echo admin_url( 'options.php' ); ?>">
+				<?php settings_fields( 'github-core-updater' ); ?>
+				<table class="form-table" role="presentation">
+					<tbody>
+						<tr>
+							<th scope="row">Current Version</th>
+							<td><?php echo esc_html( $status['local'] ); ?></td>
+						</tr>
+						<?php if ( $status['available'] ) : ?>
+						<tr>
+							<th scope="row">Available Version</th>
+							<td><strong><?php echo esc_html( $status['remote'] ); ?></strong></td>
+						</tr>
+						<tr>
+							<th scope="row">Release Notes</th>
+							<td><?php echo wp_kses_post( $status['release']['body'] ); ?></td>
+						</tr>
+						<tr>
+							<th scope="row">Action</th>
+							<td>
+								<a href="<?php echo wp_nonce_url( admin_url( 'options-general.php?page=github-core-updater&action=update_now' ), 'github-core-update' ); ?>" class="button button-primary">Update Now</a>
+							</td>
+						</tr>
+						<?php else : ?>
+						<tr>
+							<th scope="row">Status</th>
+							<td><span class="notice notice-success">You are up to date!</span></td>
+						</tr>
+						<?php endif; ?>
+						<tr>
+							<th scope="row">Auto-Update</th>
+							<td>
+								<fieldset>
+									<label for="github_core_auto_update">
+										<input type="checkbox" id="github_core_auto_update" name="github_core_auto_update" value="1" <?php checked( get_option( 'github_core_auto_update', false ), true ); ?>>
+										Enable automatic updates
+									</label>
+									<p class="description">Automatically download and install new releases from GitHub.</p>
+								</fieldset>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				<?php submit_button( 'Save Changes' ); ?>
+			</form>
+		</div>
+		<?php
 	}
 }
 
