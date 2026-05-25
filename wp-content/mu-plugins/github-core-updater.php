@@ -16,12 +16,25 @@ class GitHub_Core_Updater {
 		// Inject our update info into WP's core update transient
 		add_filter( 'site_transient_update_core', array( $this, 'inject_core_update' ) );
 
+		// Bypass VCS check since we use stable GitHub releases
+		add_filter( 'automatic_updates_is_vcs_checkout', '__return_false' );
+
+		// Hide the default WP reinstall/nightly links - use our releases only
+		add_filter( 'update_core_allowed_actions', array( $this, 'filter_update_actions' ) );
+
 		// Add settings page
 		add_action( 'admin_menu', array( $this, 'add_settings_page' ) );
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
 
 		// Manual update trigger
 		add_action( 'admin_init', array( $this, 'handle_update_action' ) );
+	}
+
+	/**
+	 * Filter out default WP actions - we only support upgrade to our releases
+	 */
+	public function filter_update_actions( $actions ) {
+		return array( 'upgrade' => $actions['upgrade'] );
 	}
 
 	/**
