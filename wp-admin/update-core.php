@@ -269,6 +269,16 @@ function core_upgrade_preamble() {
 			)
 		);
 
+		// Fork-specific: backup is created automatically on update.
+		$backup_notice = __( 'Note: A backup of your current WordPress files will be created automatically when you click Update. You can use it to roll back if needed.' );
+		wp_admin_notice(
+			$backup_notice,
+			array(
+				'type'               => 'info',
+				'additional_classes' => array( 'inline' ),
+			)
+		);
+
 		// Check for available rollback backups from our fork.
 		require_once ABSPATH . 'wp-admin/includes/class-core-upgrader.php';
 		$backup_info = Core_Upgrader::get_available_backups();
