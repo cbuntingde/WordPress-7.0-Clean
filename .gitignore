@@ -1,8 +1,9 @@
 # Dependencies (should be installed via composer locally)
 vendor/
 composer.phar
-composer.json
-composer.lock
+# composer.json and composer.lock are tracked for CI
+!composer.json
+!composer.lock
 
 # Dev tools
 .php-cs-fixer.cache/
@@ -13,6 +14,7 @@ psalm.xml
 
 # Docker
 docker-compose.yml
+!docker/docker-compose.yml
 nginx/
 php/
 

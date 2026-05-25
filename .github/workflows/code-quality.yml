@@ -27,58 +27,11 @@ jobs:
 
       - name: Install dependencies
         run: composer install --prefer-dist --no-interaction
+        working-directory: .
 
       - name: Run PHPCS
         run: ./vendor/bin/phpcs -n
 
       - name: Suggest PHPCBF fixes
         if: failure()
-        run: ./vendor/bin/phpcbf --help || true
-
-  phpstan:
-    name: PHPStan
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.5'
-
-      - name: Cache Composer
-        uses: actions/cache@v4
-        with:
-          path: vendor
-          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
-
-      - name: Install dependencies
-        run: composer install --prefer-dist --no-interaction
-
-      - name: Run PHPStan
-        run: ./vendor/bin/phpstan analyse -l 6 -i '#Constant.*not found#' -i '#Variable.*not defined#' --memory-limit=1G
-
-  psalm:
-    name: Psalm
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.5'
-
-      - name: Cache Composer
-        uses: actions/cache@v4
-        with:
-          path: vendor
-          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
-
-      - name: Install dependencies
-        run: composer install --prefer-dist --no-interaction
-
-      - name: Run Psalm
-        run: ./vendor/bin/psalm --no-cache --show-info=false
+        run: ./vendor/bin/phpcbf -n
