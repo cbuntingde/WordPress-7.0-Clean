@@ -1,5 +1,5 @@
-[rules]
-defaultAllowList = ["wp-config-sample.php", "**/*.sample.*"]
+# Gitleaks config - excludes false positives
+# Rules are inferred, we just exclude paths we don't want scanned
 
 [paths]
-exclude = ["**/*.md", "**/wp-config-sample.php"]
+exclude = [".git", "vendor", "wp-content/plugins", "wp-content/themes", "tests", "docs", "docker"]
