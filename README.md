@@ -1,4 +1,4 @@
-# WordPress Modernized Core
+# WordPress (Fork) Modernized Core
 
 WordPress has accumulated decades of backward compatibility code to support PHP versions from 5.6 through 8.x. This creates unnecessary overhead: polyfill functions that duplicate native PHP features, version checks scattered throughout the codebase, entire subsystems for protocols replaced by modern APIs, and legacy database workarounds for MySQL versions that reached end-of-life years ago. The codebase became difficult to audit, slower than necessary, and filled with code paths that no longer served any real purpose.
 
