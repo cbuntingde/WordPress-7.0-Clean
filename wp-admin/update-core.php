@@ -287,6 +287,25 @@ function core_upgrade_preamble() {
 				)
 			);
 		}
+
+		// Always show rollback option if a backup exists.
+		require_once ABSPATH . 'wp-admin/includes/class-core-upgrader.php';
+		$backup_info = Core_Upgrader::get_available_backups();
+		if ( $backup_info ) {
+			$rollback_url = wp_nonce_url( self_admin_url( 'update-core.php?action=do-rollback' ), 'rollback-core' );
+			$rollback_msg = sprintf(
+				__( 'A backup is available from version %1$s. You can <a href="%2$s">roll back to this version</a> if needed.' ),
+				esc_html( $backup_info['version'] ),
+				esc_url( $rollback_url )
+			);
+			wp_admin_notice(
+				$rollback_msg,
+				array(
+					'type'               => 'info',
+					'additional_classes' => array( 'inline' ),
+				)
+			);
+		}
 	} elseif ( $is_development_version ) {
 		echo '<h2 class="response">' . __( 'You are using a development version of WordPress.' ) . '</h2>';
 	} else {
