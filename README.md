@@ -10,7 +10,7 @@ This project strips all of that away by requiring PHP 8.5+ and MySQL 8.0.0+. The
 
 - **Official WP 7.0** → This project's **7.0.1+**
 - Updates come from **GitHub releases**, not wordpress.org
-- Use the built-in **Settings → Core Updater** page (mu-plugin) to check for updates
+- Uses the built-in **Dashboard → Updates** page to check for and apply updates
 - Do not rely on WordPress.org for updates — they won't work
 
 ## New Features
@@ -23,7 +23,7 @@ This project strips all of that away by requiring PHP 8.5+ and MySQL 8.0.0+. The
 - Added core rollback capability — creates backup before update, provides restore UI
 - Modified wp-includes/update.php to check GitHub releases
 - Added upgrade_800() migration for existing installs (MySQL 8.0+ schema)
-- Added GitHub core update checker mu-plugin to query releases directly from GitHub
+- Added GitHub release check integrated into core update.php
 - Removed rss-functions.php (broken reference to missing rss.php)
 - Simplified compat.php to sodium_compat loader only
 - Replaced utf8_encode/utf8_decode with mb_convert_encoding()
@@ -150,21 +150,15 @@ docker compose up -d --build
 
 Access at http://localhost:8090 (admin / admin123)
 
-## Core Update Protection
+## Updates
 
-This repo includes a must-use plugin (`wp-content/mu-plugins/github-core-updater.php`) that checks GitHub releases for updates instead of wordpress.org.
+GitHub release checking is integrated directly into WordPress core (`wp-includes/update.php`). When you visit **Dashboard → Updates**, it checks both wordpress.org and our GitHub releases, preferring ours if newer.
 
-**How it works:**
-- Queries `https://api.github.com/repos/cbuntingde/WordPress-7.0-Clean/releases/latest`
-- Compares the remote version tag with local `$wp_version`
-- Shows an admin notice when a new release is available
-- Provides a direct download link to the zip
+- Uses the standard WP Updates UI—no separate plugin needed
+- Shows your releases on the Updates page when newer
+- Applies updates through the normal WP update process
 
-**No automatic updates** — The plugin only notifies you. Updates must be applied manually by downloading the zip and extracting it over your installation.
-
-This gives you full control while still being notified of new releases.
-
-**Also recommended**, add this to your `wp-config.php` for defense in depth:
+**Recommended**, add this to your `wp-config.php` for defense in depth:
 
 ```php
 define( 'WP_AUTO_UPDATE_CORE', false );
