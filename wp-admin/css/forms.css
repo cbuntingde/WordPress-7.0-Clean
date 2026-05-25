@@ -1115,6 +1115,13 @@ table.form-table td .updated p {
 	grid-template-columns: repeat(3, 1fr);
 	gap: 16px;
 	margin-top: 24px;
+	max-width: 100%;
+}
+
+@media screen and (max-width: 1100px) {
+	.tools-cards {
+		grid-template-columns: repeat(2, 1fr);
+	}
 }
 
 @media screen and (max-width: 800px) {
@@ -1131,6 +1138,8 @@ table.form-table td .updated p {
 
 .tools-cards .card {
 	margin-top: 0;
+	min-width: auto;
+	max-width: none;
 }
 
 .card {
