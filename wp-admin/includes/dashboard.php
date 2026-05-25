@@ -149,10 +149,12 @@ function wp_dashboard_setup() {
 		wp_add_dashboard_widget( $widget_id, $name, $wp_registered_widgets[ $widget_id ]['callback'], $wp_registered_widget_controls[ $widget_id ]['callback'] );
 	}
 
-	if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['widget_id'] ) ) {
-		check_admin_referer( 'edit-dashboard-widget_' . $_POST['widget_id'], 'dashboard-widget-nonce' );
+	$widget_id = isset( $_POST['widget_id'] ) ? sanitize_text_field( wp_unslash( $_POST['widget_id'] ) ) : '';
+
+	if ( 'POST' === $_SERVER['REQUEST_METHOD'] && $widget_id ) {
+		check_admin_referer( 'edit-dashboard-widget_' . $widget_id, 'dashboard-widget-nonce' );
 		ob_start(); // Hack - but the same hack wp-admin/widgets.php uses.
-		wp_dashboard_trigger_widget_control( $_POST['widget_id'] );
+		wp_dashboard_trigger_widget_control( $widget_id );
 		ob_end_clean();
 		wp_redirect( remove_query_arg( 'edit' ) );
 		exit;
@@ -198,10 +200,12 @@ function wp_add_dashboard_widget( $widget_id, $widget_name, $callback, $control_
 		$callback_args = array_merge( $callback_args, $private_callback_args );
 	}
 
+	$edit = isset( $_GET['edit'] ) ? sanitize_text_field( wp_unslash( $_GET['edit'] ) ) : false;
+
 	if ( $control_callback && is_callable( $control_callback ) && current_user_can( 'edit_dashboard' ) ) {
 		$wp_dashboard_control_callbacks[ $widget_id ] = $control_callback;
 
-		if ( isset( $_GET['edit'] ) && $widget_id === $_GET['edit'] ) {
+		if ( $edit && $widget_id === $edit ) {
 			list($url)    = explode( '#', add_query_arg( 'edit', false ), 2 );
 			$widget_name .= ' <span class="postbox-title-action"><a href="' . esc_url( $url ) . '">' . __( 'Cancel' ) . '</a></span>';
 			$callback     = '_wp_dashboard_control_callback';
