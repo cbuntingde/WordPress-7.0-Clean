@@ -128,7 +128,7 @@ class WP_Ajax_Response {
 		}
 
 		if ( false === $action ) {
-			$action = $_POST['action'];
+			$action = isset( $_POST['action'] ) ? sanitize_text_field( wp_unslash( $_POST['action'] ) ) : '';
 		}
 		$x  = '';
 		$x .= "<response action='{$action}_$id'>"; // The action attribute in the xml output is formatted like a nonce action.

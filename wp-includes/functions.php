@@ -4110,8 +4110,12 @@ function _jsonp_wp_die_handler( $message, $title = '', $args = array() ) {
 	}
 
 	$result         = wp_json_encode( $data );
-	$jsonp_callback = $_GET['_jsonp'];
-	echo '/**/' . $jsonp_callback . '(' . $result . ')';
+	$jsonp_callback = isset( $_GET['_jsonp'] ) ? sanitize_text_field( wp_unslash( $_GET['_jsonp'] ) ) : '';
+	if ( $jsonp_callback && wp_check_jsonp_callback( $jsonp_callback ) ) {
+		echo '/**/' . $jsonp_callback . '(' . $result . ')';
+	} else {
+		echo $result;
+	}
 	if ( $parsed_args['exit'] ) {
 		die();
 	}
@@ -4555,7 +4559,8 @@ function wp_check_jsonp_callback( $callback ) {
 		return false;
 	}
 
-	preg_replace( '/[^\w\.]/', '', $callback, -1, $illegal_char_count );
+	preg_match( '/[^\w\.]/', $callback, $matches );
+	$illegal_char_count = count( $matches );
 
 	return 0 === $illegal_char_count;
 }
