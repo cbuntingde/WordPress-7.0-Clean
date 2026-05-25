@@ -400,6 +400,17 @@ class Core_Upgrader extends WP_Upgrader {
 	}
 
 	/**
+	 * Get the latest version from GitHub.
+	 *
+	 * @since 7.0.0
+	 * @return string|false Latest version or false on failure.
+	 */
+	public static function get_latest_github_version() {
+		$release = wp_check_github_core_update();
+		return $release['version'] ?? false;
+	}
+
+	/**
 	 * Compares the disk file checksums against the expected checksums.
 	 *
 	 * @since 3.7.0
@@ -435,16 +446,26 @@ class Core_Upgrader extends WP_Upgrader {
 	 * Creates a backup of WordPress core files before updating.
 	 *
 	 * @since 7.0.0
+	 *
+	 * @param callable|null $progress_callback Optional. Callback function receiving (percent, message).
 	 * @return true|WP_Error True on success, WP_Error on failure.
 	 */
-	public function create_backup_before_update() {
+	public function create_backup_before_update( $progress_callback = null ) {
 		global $wp_version;
+
+		if ( is_callable( $progress_callback ) ) {
+			call_user_func( $progress_callback, 10, __( 'Preparing backup...' ) );
+		}
 
 		$backups_dir = WP_CONTENT_DIR . '/backups';
 		if ( ! is_dir( $backups_dir ) ) {
 			if ( ! wp_mkdir_p( $backups_dir ) ) {
 				return new WP_Error( 'backup_dir_create', __( 'Unable to create backups directory.' ) );
 			}
+		}
+
+		if ( is_callable( $progress_callback ) ) {
+			call_user_func( $progress_callback, 30, __( 'Creating backup archive...' ) );
 		}
 
 		$timestamp = gmdate( 'Y-m-d-H-i-s' );
@@ -467,12 +488,20 @@ class Core_Upgrader extends WP_Upgrader {
 			return new WP_Error( 'backup_zip_open', __( 'Unable to create backup archive.' ) );
 		}
 
+		if ( is_callable( $progress_callback ) ) {
+			call_user_func( $progress_callback, 50, __( 'Adding files to backup...' ) );
+		}
+
 		foreach ( $include_paths as $path ) {
 			if ( is_dir( $path ) ) {
 				$this->add_directory_to_zip( $zip, $path, basename( $path ) );
 			} elseif ( is_file( $path ) ) {
 				$zip->addFile( $path, basename( $path ) );
 			}
+		}
+
+		if ( is_callable( $progress_callback ) ) {
+			call_user_func( $progress_callback, 70, __( 'Finalizing backup...' ) );
 		}
 
 		$zip->close();
@@ -482,10 +511,19 @@ class Core_Upgrader extends WP_Upgrader {
 			'timestamp' => $timestamp,
 			'filename'  => basename( $backup_file ),
 		);
+
+		if ( is_callable( $progress_callback ) ) {
+			call_user_func( $progress_callback, 90, __( 'Writing metadata...' ) );
+		}
+
 		file_put_contents(
 			$backups_dir . '/' . $timestamp . '-info.json',
 			json_encode( $metadata )
 		);
+
+		if ( is_callable( $progress_callback ) ) {
+			call_user_func( $progress_callback, 100, __( 'Backup complete.' ) );
+		}
 
 		return true;
 	}
