@@ -51,32 +51,46 @@ function get_core_updates( $options = array() ) {
 		$dismissed = array();
 	}
 
-	$from_api = get_site_transient( 'update_core' );
+	// Use GitHub release instead of WordPress.org API.
+	$release = wp_check_github_core_update();
 
-	if ( ! isset( $from_api->updates ) || ! is_array( $from_api->updates ) ) {
+	if ( ! $release || empty( $release['version'] ) ) {
 		return false;
 	}
 
-	$updates = $from_api->updates;
-	$result  = array();
+	$wp_version = wp_get_wp_version();
+	$has_update = version_compare( $release['version'], $wp_version, '>' );
 
-	foreach ( $updates as $update ) {
-		if ( 'autoupdate' === $update->response ) {
-			continue;
-		}
+	// Build update object matching WordPress.org API format.
+	$update = (object) array(
+		'response'    => $has_update ? 'upgrade' : 'latest',
+		'current'     => $release['version'],
+		'download'    => $release['download'],
+		'packages'    => (object) array(
+			'full'    => $release['download'],
+			'partial' => false,
+			'no_content' => false,
+		),
+		'locale'      => 'en_US',
+		'version'    => $release['version'],
+		'php_version' => '8.0',
+		'mysql_version' => '5.0',
+	);
 
-		if ( array_key_exists( $update->current . '|' . $update->locale, $dismissed ) ) {
-			if ( $options['dismissed'] ) {
-				$update->dismissed = true;
-				$result[]          = $update;
-			}
-		} elseif ( $options['available'] ) {
-				$update->dismissed = false;
-				$result[]          = $update;
+	// Check if this update is dismissed.
+	if ( array_key_exists( $update->current . '|' . $update->locale, $dismissed ) ) {
+		if ( $options['dismissed'] ) {
+			$update->dismissed = true;
+			return array( $update );
 		}
+		return false;
 	}
 
-	return $result;
+	if ( $options['available'] ) {
+		return array( $update );
+	}
+
+	return false;
 }
 
 /**

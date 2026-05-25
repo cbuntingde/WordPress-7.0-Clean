@@ -248,7 +248,10 @@ function wp_ajax_do_core_update() {
 	$result = $upgrader->upgrade( $current );
 
 	if ( is_wp_error( $result ) ) {
-		wp_send_json_error( array( 'message' => $result->get_error_message() ), 500 );
+		$message = WP_DEBUG
+			? 'Core update error: ' . $result->get_error_message() . ' (code: ' . $result->get_error_code() . ')'
+			: $result->get_error_message();
+		wp_send_json_error( array( 'message' => $message ), 500 );
 	}
 
 	wp_send_json_success(
