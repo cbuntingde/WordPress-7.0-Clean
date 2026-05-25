@@ -1,6 +1,6 @@
 # WordPress (Fork) Modernized Core
 
-This fork modernizes WordPress by removing legacy compatibility code. Based on WordPress 7.0, it strips away decades of polyfills and version checks that supported PHP 5.6-8.x — requiring PHP 8.5+ and MySQL 8.0+ for cleaner, faster code (benchmarks show PHP 8.5 ~23% faster than PHP 8.3).
+This fork modernizes WordPress by removing legacy compatibility code. Based on WordPress 7.0 "Armstrong", it strips away decades of polyfills and version checks that supported PHP 5.6-8.x — requiring PHP 8.5+ and MySQL 8.0+ for cleaner, faster code (benchmarks show PHP 8.5 ~23% faster than PHP 8.3).
 
 ## Important: Custom Versioning
 
