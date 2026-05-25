@@ -43,6 +43,10 @@ docs
 *.phar
 node_modules/
 dist/
+!dist/
+
+# WordPress zips (*.zip is ignored but you can force-add with -f)
+*.zip
 
 # WordPress
 wp-config.php
