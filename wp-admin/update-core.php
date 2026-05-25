@@ -268,6 +268,25 @@ function core_upgrade_preamble() {
 				'additional_classes' => array( 'inline' ),
 			)
 		);
+
+		// Check for available rollback backups from our fork.
+		require_once ABSPATH . 'wp-admin/includes/class-core-upgrader.php';
+		$backup_info = Core_Upgrader::get_available_backups();
+		if ( $backup_info ) {
+			$rollback_url = wp_nonce_url( self_admin_url( 'update-core.php?action=do-rollback' ), 'rollback-core' );
+			$rollback_msg = sprintf(
+				__( 'A backup is available from version %1$s. You can <a href="%2$s">roll back to this version</a> if the update causes issues.' ),
+				esc_html( $backup_info['version'] ),
+				esc_url( $rollback_url )
+			);
+			wp_admin_notice(
+				$rollback_msg,
+				array(
+					'type'               => 'info',
+					'additional_classes' => array( 'inline' ),
+				)
+			);
+		}
 	} elseif ( $is_development_version ) {
 		echo '<h2 class="response">' . __( 'You are using a development version of WordPress.' ) . '</h2>';
 	} else {
@@ -977,6 +996,17 @@ function do_undismiss_core_update() {
 
 $action = $_GET['action'] ?? 'upgrade-core';
 
+// Handle rollback success message.
+if ( ! empty( $_GET['rollback'] ) && 'success' === $_GET['rollback'] ) {
+	wp_admin_notice(
+		__( 'WordPress has been rolled back to the previous version.' ),
+		array(
+			'type'               => 'success',
+			'additional_classes' => array( 'inline' ),
+		)
+	);
+}
+
 $upgrade_error = false;
 if ( ( 'do-theme-upgrade' === $action || ( 'do-plugin-upgrade' === $action && ! isset( $_GET['plugins'] ) ) )
 	&& ! isset( $_POST['checked'] ) ) {
@@ -1184,6 +1214,32 @@ if ( 'upgrade-core' === $action ) {
 	);
 
 	require_once ABSPATH . 'wp-admin/admin-footer.php';
+
+} elseif ( 'do-rollback' === $action ) {
+
+	if ( ! current_user_can( 'update_core' ) ) {
+		wp_die( __( 'Sorry, you are not allowed to update this site.' ) );
+	}
+
+	check_admin_referer( 'rollback-core' );
+
+	require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+	require_once ABSPATH . 'wp-admin/includes/class-core-upgrader.php';
+
+	$upgrader = new Core_Upgrader( new Automatic_Upgrader_Skin() );
+	$result   = $upgrader->restore_from_backup();
+
+	if ( is_wp_error( $result ) ) {
+		wp_die( $result );
+	}
+
+	// Remove any .maintenance file.
+	if ( file_exists( ABSPATH . '.maintenance' ) ) {
+		unlink( ABSPATH . '.maintenance' );
+	}
+
+	wp_redirect( self_admin_url( 'update-core.php?rollback=success' ) );
+	exit();
 
 } elseif ( 'do-plugin-upgrade' === $action ) {
 

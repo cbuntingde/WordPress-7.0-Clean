@@ -125,6 +125,15 @@ class Core_Upgrader extends WP_Upgrader {
 			return new WP_Error( 'locked', $this->strings['locked'] );
 		}
 
+		// Create a backup before updating, if not doing a rollback.
+		if ( ! $parsed_args['do_rollback'] ) {
+			$backup_result = $this->create_backup_before_update();
+			if ( is_wp_error( $backup_result ) ) {
+				WP_Upgrader::release_lock( 'core_updater' );
+				return $backup_result;
+			}
+		}
+
 		$download = $this->download_package( $current->packages->$to_download, false );
 
 		/*
@@ -420,5 +429,166 @@ class Core_Upgrader extends WP_Upgrader {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Creates a backup of WordPress core files before updating.
+	 *
+	 * @since 7.0.0
+	 * @return true|WP_Error True on success, WP_Error on failure.
+	 */
+	public function create_backup_before_update() {
+		global $wp_version;
+
+		$backups_dir = WP_CONTENT_DIR . '/backups';
+		if ( ! is_dir( $backups_dir ) ) {
+			if ( ! wp_mkdir_p( $backups_dir ) ) {
+				return new WP_Error( 'backup_dir_create', __( 'Unable to create backups directory.' ) );
+			}
+		}
+
+		$timestamp = gmdate( 'Y-m-d-H-i-s' );
+		$backup_file = $backups_dir . '/wordpress-' . $timestamp . '.zip';
+
+		$include_paths = array(
+			ABSPATH . 'wp-admin',
+			ABSPATH . 'wp-includes',
+		);
+
+		$root_files = glob( ABSPATH . '*.php' );
+		foreach ( $root_files as $file ) {
+			if ( 'wp-config.php' !== basename( $file ) && is_file( $file ) ) {
+				$include_paths[] = $file;
+			}
+		}
+
+		$zip = new ZipArchive();
+		if ( true !== $zip->open( $backup_file, ZipArchive::CREATE ) ) {
+			return new WP_Error( 'backup_zip_open', __( 'Unable to create backup archive.' ) );
+		}
+
+		foreach ( $include_paths as $path ) {
+			if ( is_dir( $path ) ) {
+				$this->add_directory_to_zip( $zip, $path, basename( $path ) );
+			} elseif ( is_file( $path ) ) {
+				$zip->addFile( $path, basename( $path ) );
+			}
+		}
+
+		$zip->close();
+
+		$metadata = array(
+			'version'    => $wp_version,
+			'timestamp' => $timestamp,
+			'filename'  => basename( $backup_file ),
+		);
+		file_put_contents(
+			$backups_dir . '/' . $timestamp . '-info.json',
+			json_encode( $metadata )
+		);
+
+		return true;
+	}
+
+	private function add_directory_to_zip( $zip, $dir, $base_dir ) {
+		$items = new RecursiveIteratorIterator(
+			new RecursiveDirectoryIterator( $dir, RecursiveDirectoryIterator::SKIP_DOTS ),
+			RecursiveIteratorIterator::SELF_FIRST
+		);
+
+		foreach ( $items as $item ) {
+			$relative_path = $base_dir . substr( $item->getPathname(), strlen( ABSPATH ) );
+			if ( $item->isDir() ) {
+				$zip->addEmptyDir( $relative_path );
+			} elseif ( $item->isFile() ) {
+				$zip->addFile( $item->getPathname(), $relative_path );
+			}
+		}
+	}
+
+	public static function get_available_backups() {
+		$backups_dir = WP_CONTENT_DIR . '/backups';
+		if ( ! is_dir( $backups_dir ) ) {
+			return null;
+		}
+
+		$infos = glob( $backups_dir . '/*-info.json' );
+		if ( empty( $infos ) ) {
+			return null;
+		}
+
+		$latest_info = null;
+		$latest_ts  = 0;
+
+		foreach ( $infos as $info_file ) {
+			$data = json_decode( file_get_contents( $info_file ), true );
+			if ( $data && isset( $data['timestamp'] ) ) {
+				$ts = strtotime( $data['timestamp'] );
+				if ( $ts > $latest_ts ) {
+					$latest_ts  = $ts;
+					$latest_info = $data;
+				}
+			}
+		}
+
+		return $latest_info;
+	}
+
+	public function restore_from_backup() {
+		global $wp_filesystem;
+
+		$backup_info = self::get_available_backups();
+		if ( ! $backup_info ) {
+			return new WP_Error( 'no_backup', __( 'No backup available.' ) );
+		}
+
+		$backups_dir = WP_CONTENT_DIR . '/backups';
+		$backup_file = $backups_dir . '/' . $backup_info['filename'];
+
+		if ( ! file_exists( $backup_file ) ) {
+			return new WP_Error( 'backup_missing', __( 'Backup file not found.' ) );
+		}
+
+		$res = $this->fs_connect( array( ABSPATH, WP_CONTENT_DIR ), false );
+		if ( ! $res || is_wp_error( $res ) ) {
+			return $res;
+		}
+
+		$temp_dir = WP_CONTENT_DIR . '/upgrade/restore-temp';
+		if ( is_dir( $temp_dir ) ) {
+			$this->delete_old_files( $temp_dir );
+		}
+
+		$unzipped = unzip_file( $backup_file, $temp_dir );
+		if ( is_wp_error( $unzipped ) ) {
+			return $unzipped;
+		}
+
+		$copy_result = copy_dir( $temp_dir, ABSPATH );
+		if ( is_wp_error( $copy_result ) ) {
+			return $copy_result;
+		}
+
+		$this->delete_old_files( $temp_dir );
+
+		return true;
+	}
+
+	private function delete_old_files( $dir ) {
+		if ( is_dir( $dir ) ) {
+			$files = array_diff(
+				scandir( $dir ),
+				array( '.', '..' )
+			);
+			foreach ( $files as $file ) {
+				$path = "$dir/$file";
+				if ( is_dir( $path ) ) {
+					$this->delete_old_files( $path );
+				} else {
+					unlink( $path );
+				}
+			}
+			rmdir( $dir );
+		}
 	}
 }

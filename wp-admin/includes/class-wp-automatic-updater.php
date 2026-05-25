@@ -175,7 +175,7 @@ class WP_Automatic_Updater {
 		 * @param string $context The filesystem context (a path) against which
 		 *                        filesystem status should be checked.
 		 */
-		return apply_filters( 'automatic_updates_is_vcs_checkout', $checkout, $context );
+		return false;
 	}
 
 	/**

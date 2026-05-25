@@ -13,8 +13,16 @@ This project strips all of that away by requiring PHP 8.5+ and MySQL 8.0.0+. The
 - Use the built-in **Settings → Core Updater** page (mu-plugin) to check for updates
 - Do not rely on WordPress.org for updates — they won't work
 
+## New Features
+
+- **Core Rollback**: Creates backup before updates; restore from backups on the Updates page if issues occur.
+- **GitHub Updates**: Integrated into core update.php — checks GitHub releases directly, prefers our releases over wordpress.org.
+
 ## Latest Changes
 
+- Added core rollback capability — creates backup before update, provides restore UI
+- Modified wp-includes/update.php to check GitHub releases
+- Added upgrade_800() migration for existing installs (MySQL 8.0+ schema)
 - Added GitHub core update checker mu-plugin to query releases directly from GitHub
 - Removed rss-functions.php (broken reference to missing rss.php)
 - Simplified compat.php to sodium_compat loader only
