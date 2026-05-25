@@ -265,6 +265,14 @@ function core_upgrade_preamble() {
 			)
 		);
 
+		// Fork-specific: Show manual backup button.
+		if ( current_user_can( 'update_core' ) ) {
+			$backup_url = wp_nonce_url( self_admin_url( 'update-core.php?action=do-core-backup' ), 'backup-core' );
+			echo '<p class="backup-buttons hide-if-no-js">';
+			echo '<a href="' . esc_url( $backup_url ) . '" class="button secondary" id="create-backup-btn">' . __( 'Create Backup Now' ) . '</a>';
+			echo '</p>';
+		}
+
 		// Check for available rollback backups from our fork.
 		require_once ABSPATH . 'wp-admin/includes/class-core-upgrader.php';
 		$backup_info = Core_Upgrader::get_available_backups();
@@ -1022,6 +1030,17 @@ if ( ! empty( $_GET['rollback'] ) && 'success' === $_GET['rollback'] ) {
 	);
 }
 
+// Handle backup success message.
+if ( ! empty( $_GET['backup'] ) && 'success' === $_GET['backup'] ) {
+	wp_admin_notice(
+		__( 'A backup of your WordPress files has been created. You can use it to roll back if needed.' ),
+		array(
+			'type'               => 'success',
+			'additional_classes' => array( 'inline' ),
+		)
+	);
+}
+
 $upgrade_error = false;
 if ( ( 'do-theme-upgrade' === $action || ( 'do-plugin-upgrade' === $action && ! isset( $_GET['plugins'] ) ) )
 	&& ! isset( $_POST['checked'] ) ) {
@@ -1229,6 +1248,72 @@ if ( 'upgrade-core' === $action ) {
 	);
 
 	require_once ABSPATH . 'wp-admin/admin-footer.php';
+
+} elseif ( 'do-core-backup' === $action ) {
+
+	if ( ! current_user_can( 'update_core' ) ) {
+		wp_die( __( 'Sorry, you are not allowed to update this site.' ) );
+	}
+
+	check_admin_referer( 'backup-core' );
+
+	// Fork-specific: Stream output directly to show progress.
+	header( 'Content-Type: text/html; charset=' . get_option( 'blog_charset' ) );
+	header( 'X-Accel-Buffering: no' );
+
+	// Start output buffer to show progress.
+	ob_implicit_flush( 1 );
+	ob_end_flush();
+
+	echo '<!DOCTYPE html><html><head>';
+	echo '<meta name="viewport" content="width=device-width, initial-scale=1">';
+	echo '<style>body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;margin:40px auto;max-width:600px;padding:20px;background:#f0f0f1}.progress{background:#fff;border-radius:8px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.1)}.spinner{border:3px solid #e0e0e0;border-top-color:#2271b1;border-radius:50%;width:24px;height:24px;animation:spin 1s linear infinite;display:inline-block;vertical-align:middle;margin-right:10px}@keyframes spin{to{transform:rotate(360deg)}}h2{margin-top:0;color:#1d2327}.message{padding:10px 15px;margin:5px 0;background:#f6f7f7;border-left:3px solid #2271b1}.success{border-left-color:#2a9b6f}.error{border-left-color:#d63638}a{color:#2271b1;text-decoration:none}</style>';
+	echo '</head><body>';
+	echo '<div class="progress">';
+	echo '<h2><span class="spinner"></span>Creating Backup...</h2>';
+	echo '<p class="message">This may take a few minutes depending on your site size.</p>';
+	echo '<p id="log"></p>';
+	echo '</div>';
+	echo '<script>window.onload=function(){document.getElementById("log").textContent="Initializing backup..."}</script>';
+	flush();
+
+	require_once ABSPATH . 'wp-admin/includes/file.php';
+	require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+	require_once ABSPATH . 'wp-admin/includes/class-core-upgrader.php';
+
+	// Flush credentials requests - use direct filesystem.
+	ob_start();
+	$credentials = request_filesystem_credentials( '', '', false, ABSPATH );
+	ob_end_clean();
+
+	if ( ! $credentials ) {
+		echo '<p class="message error">Failed to access filesystem. Please check your FTP/SSH credentials.</p></body></html>';
+		exit();
+	}
+
+	if ( ! WP_Filesystem( $credentials, ABSPATH ) ) {
+		echo '<p class="message error">Failed to connect to filesystem.</p></body></html>';
+		exit();
+	}
+
+	global $wp_filesystem;
+	echo '<script>document.getElementById("log").textContent="Connected to filesystem, starting backup..."</script>';
+	flush();
+
+	$upgrader = new Core_Upgrader();
+	$result   = $upgrader->create_backup_before_update();
+
+	if ( is_wp_error( $result ) ) {
+		echo '<p class="message error">' . esc_html( $result->get_error_message() ) . '</p>';
+		echo '</div></body></html>';
+		exit();
+	}
+
+	echo '<p class="message success">Backup created successfully!</p>';
+	echo '<p><a href="' . esc_url( self_admin_url( 'update-core.php' ) ) . '">Return to Updates page</a></p>';
+	echo '<script>window.location="?backup=success"</script>';
+	echo '</div></body></html>';
+	exit();
 
 } elseif ( 'do-rollback' === $action ) {
 
