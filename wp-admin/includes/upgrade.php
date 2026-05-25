@@ -2546,15 +2546,17 @@ function upgrade_800() {
 		"ALTER TABLE $wpdb->posts MODIFY post_name VARCHAR(255) NOT NULL DEFAULT ''"
 	);
 
+	// Add post_content_filtered column if it doesn't exist (needed for block editor global styles).
+	maybe_add_column( $wpdb->posts, 'post_content_filtered', "ALTER TABLE $wpdb->posts ADD COLUMN post_content_filtered LONGTEXT AFTER post_content" );
+
 	// Add index on (post_modified, ID) for sorting queries.
-	$wpdb->query(
-		"ALTER TABLE $wpdb->posts ADD KEY post_modified (post_modified, ID)"
-	);
+	dbDelta( "ALTER TABLE $wpdb->posts ADD KEY post_modified (post_modified, ID)" );
 
 	// Add index on (post_type, post_name) for pretty permalinks.
-	$wpdb->query(
-		"ALTER TABLE $wpdb->posts ADD KEY post_type_name (post_type, post_name)"
-	);
+	dbDelta( "ALTER TABLE $wpdb->posts ADD KEY post_type_name (post_type, post_name)" );
+
+	// Add composite KEY (post_id, meta_key) to wp_postmeta for better performance.
+	dbDelta( "ALTER TABLE $wpdb->postmeta ADD KEY post_id_meta_key (post_id, meta_key)" );
 }
 
 /**

@@ -22,7 +22,7 @@ This fork modernizes WordPress by removing legacy compatibility code. Based on W
 
 - Removed theme-compat fallback templates (themes now must provide all required template files)
 - Removed spl-autoload-compat.php (never loaded)
-- Stripped compat.php (sodium polyfill no longer needed)
+- Deleted compat.php (sodium polyfill no longer needed)
 - Added core rollback capability — creates backup before update, provides restore UI
 - Modified wp-includes/update.php to check GitHub releases
 - Added upgrade_800() migration for existing installs (MySQL 8.0+ schema)
@@ -32,7 +32,7 @@ This fork modernizes WordPress by removing legacy compatibility code. Based on W
 - Replaced utf8_encode/utf8_decode with mb_convert_encoding()
 - Deleted mbstring polyfills (_mb_substr, _mb_strlen, helper functions)
 - Created stub rss.php to satisfy PHPStan
-- Updated phpstan.neon exclusions (deprecated.php, blocks/)
+- Updated phpstan.neon exclusions (blocks/)
 - Removed 10 polyfills from compat.php (PHP 8.0-8.5 native functions)
 - Deleted IXR/ directory (XML-RPC, 10 files)
 - Deleted class-wp-xmlrpc-server.php, class-wp-http-ixr-client.php
@@ -69,9 +69,10 @@ This fork modernizes WordPress by removing legacy compatibility code. Based on W
 - Deleted wp-includes/rss.php - Legacy RSS parser
 - Deleted wp-includes/rss-functions.php - Deprecated RSS functions
 - Deleted wp-includes/atomlib.php - Atom feed parser
-- Deleted wp-includes/deprecated.php (6,536 lines) - Legacy deprecated functions from WP 0.71-3.x
-- Deleted wp-includes/ms-deprecated.php (752 lines) - Multisite deprecated functions
-- Deleted wp-includes/pluggable-deprecated.php (221 lines) - Early pluggable functions
+- Deleted wp-includes/deprecated.php - Legacy deprecated functions from WP 0.71-5.x
+- Deleted wp-includes/ms-deprecated.php - Multisite deprecated functions
+- Deleted wp-includes/pluggable-deprecated.php - Early pluggable functions
+- Deleted wp-includes/compat.php - Removed empty compat.php require (no longer needed)
 - Deleted wp-includes/vendor/symfony/polyfill-php*/ - Symfony polyfills (PHP 8.5 native)
 - Deleted wp-includes/sodium_compat/ (104 files) - PHP sodium library (native in PHP 8.5)
 - Deleted wp-includes/class.wp-dependencies.php - Duplicate wrapper class
