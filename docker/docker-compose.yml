@@ -1,6 +1,7 @@
 services:
   wp_mariadb:
-    image: mariadb:latest
+    build:
+      context: ./mysql
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: wordpress
@@ -12,20 +13,22 @@ services:
       - wp_network
 
   wp_php:
-    build: ./php
+    build:
+      context: ./php
     volumes:
-      - .:/var/www/html
+      - ..:/var/www/html
     networks:
       - wp_network
     depends_on:
       - wp_mariadb
 
   wp_nginx:
-    build: ./nginx
+    build:
+      context: ./nginx
     ports:
       - "8090:80"
     volumes:
-      - .:/var/www/html
+      - ..:/var/www/html
     networks:
       - wp_network
     depends_on:
