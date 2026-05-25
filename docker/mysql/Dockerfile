@@ -1,7 +1,8 @@
 FROM mariadb:latest
 
-# Initial SQL setup
-COPY migrations.sql /docker-entrypoint-initdb.d/01-migrations.sql
-COPY user_roles.sql /docker-entrypoint-initdb.d/02-user_roles.sql
+# Note: Schema migrations moved to docker/php/entrypoint.sh
+# to run AFTER WordPress is installed.
+# user_roles.sql also disabled - it runs before WordPress tables exist.
+# Role updates must happen after WP install, not at DB init.
 
 VOLUME /var/lib/mysql
