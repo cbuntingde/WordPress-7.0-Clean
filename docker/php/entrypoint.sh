@@ -30,14 +30,26 @@ if [ -f /var/www/html/wp-config.php ]; then
         mysqli_query(\$c, \"ALTER TABLE wp_options MODIFY option_name VARCHAR(255) NOT NULL\");
         mysqli_query(\$c, \"ALTER TABLE wp_options MODIFY autoload ENUM('yes','no') NOT NULL DEFAULT 'yes'\");
 
-        // wp_posts: Drop unused column, optimize guid
-        @mysqli_query(\$c, \"ALTER TABLE wp_posts DROP COLUMN post_content_filtered\");
+        // wp_posts: Drop unused column, optimize guid (skip if already dropped)
+        \$col = mysqli_query(\$c, \"SHOW COLUMNS FROM wp_posts LIKE 'post_content_filtered'\");
+        if (\$col && mysqli_num_rows(\$col) > 0) {
+            mysqli_query(\$c, \"ALTER TABLE wp_posts DROP COLUMN post_content_filtered\");
+        }
         mysqli_query(\$c, \"ALTER TABLE wp_posts MODIFY guid VARBINARY(255) NOT NULL\");
 
-        // Add indexes (ignore if already exist)
-        @mysqli_query(\$c, \"ALTER TABLE wp_posts ADD INDEX post_modified_id (post_modified, ID)\");
-        @mysqli_query(\$c, \"ALTER TABLE wp_posts ADD INDEX type_name (post_type, post_name)\");
-        @mysqli_query(\$c, \"ALTER TABLE wp_postmeta ADD INDEX post_meta_idx (post_id, meta_key(255))\");
+        // Add indexes (skip if already exist)
+        \$idx1 = mysqli_query(\$c, \"SHOW INDEX FROM wp_posts WHERE Key_name = 'post_modified_id'\");
+        if (!\$idx1 || mysqli_num_rows(\$idx1) == 0) {
+            mysqli_query(\$c, \"ALTER TABLE wp_posts ADD INDEX post_modified_id (post_modified, ID)\");
+        }
+        \$idx2 = mysqli_query(\$c, \"SHOW INDEX FROM wp_posts WHERE Key_name = 'type_name'\");
+        if (!\$idx2 || mysqli_num_rows(\$idx2) == 0) {
+            mysqli_query(\$c, \"ALTER TABLE wp_posts ADD INDEX type_name (post_type, post_name)\");
+        }
+        \$idx3 = mysqli_query(\$c, \"SHOW INDEX FROM wp_postmeta WHERE Key_name = 'post_meta_idx'\");
+        if (!\$idx3 || mysqli_num_rows(\$idx3) == 0) {
+            mysqli_query(\$c, \"ALTER TABLE wp_postmeta ADD INDEX post_meta_idx (post_id, meta_key(255))\");
+        }
 
         echo 'Migrations complete.';
     } else {
