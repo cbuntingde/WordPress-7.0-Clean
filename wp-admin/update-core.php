@@ -255,20 +255,6 @@ function core_upgrade_preamble() {
 		_e( 'An updated version of WordPress is available.' );
 		echo '</h2>';
 
-		$message = sprintf(
-			/* translators: 1: Documentation on WordPress backups, 2: Documentation on updating WordPress. */
-			__( '<strong>Important:</strong> Before updating, please <a href="%1$s">back up your database and files</a>. For help with updates, visit the <a href="%2$s">Updating WordPress</a> documentation page.' ),
-			__( 'https://developer.wordpress.org/advanced-administration/security/backup/' ),
-			__( 'https://wordpress.org/documentation/article/updating-wordpress/' )
-		);
-		wp_admin_notice(
-			$message,
-			array(
-				'type'               => 'warning',
-				'additional_classes' => array( 'inline' ),
-			)
-		);
-
 		// Fork-specific: backup is created automatically on update.
 		$backup_notice = __( 'Note: A backup of your current WordPress files will be created automatically when you click Update. You can use it to roll back if needed.' );
 		wp_admin_notice(
