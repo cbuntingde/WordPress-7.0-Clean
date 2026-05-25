@@ -14,6 +14,30 @@ wp_enqueue_script( 'plugin-install' );
 wp_enqueue_script( 'updates' );
 add_thickbox();
 
+// Fork-specific: Show loading overlay when core update is in progress.
+add_action( 'admin_footer', function() {
+	?>
+	<div id="core-update-loading" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:99999;align-items:center;justify-content:center;display:flex">
+		<div style="background:#fff;padding:40px;border-radius:12px;text-align:center;max-width:400px">
+			<span class="spinner" style="float:none;margin:0 auto 20px;width:40px;height:40px;border-width:4px"></span>
+			<h2 style="margin:0 0 10px">Updating WordPress</h2>
+			<p style="margin:0;color:#666">This may take several minutes depending on your site size.</p>
+			<div id="update-status" style="margin:20px 0 0;text-align:left;font-family:monospace;font-size:12px;background:#f5f5f5;padding:15px;border-radius:6px;display:none"></div>
+		</div>
+	</div>
+	<script>
+	jQuery(function($){
+		var $form = $('form[name="upgrade"]'), $overlay = $('#core-update-loading'), $status = $('#update-status');
+		if ($form.length) {
+			$form.on('submit', function(){
+				$overlay.show();
+			});
+		}
+	});
+	</script>
+	<?php
+});
+
 if ( is_multisite() && ! is_network_admin() ) {
 	wp_redirect( network_admin_url( 'update-core.php' ) );
 	exit;
