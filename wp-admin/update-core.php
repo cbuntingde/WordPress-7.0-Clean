@@ -55,7 +55,7 @@ add_action( 'admin_footer', function() {
 				$div.css('background', '#f0fdf4').css('color', '#2a9b6f')
 					.html('<strong>Success:</strong> ' + msg);
 			}
-			$('.card-actions').before($div);
+			$('.core-update-actions').before($div);
 		}
 
 		// Update Now button
