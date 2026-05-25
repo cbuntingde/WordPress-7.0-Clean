@@ -153,14 +153,8 @@ Access at http://localhost:8090 (admin / admin123)
 GitHub release checking is integrated directly into WordPress core (`wp-includes/update.php`). When you visit **Dashboard → Updates**, it checks both wordpress.org and our GitHub releases, preferring ours if newer.
 
 - Uses the standard WP Updates UI—no separate plugin needed
-- Shows your releases on the Updates page when newer
+- Shows our releases on the Updates page when newer
 - Applies updates through the normal WP update process
-
-**Recommended**, add this to your `wp-config.php` for defense in depth:
-
-```php
-define( 'WP_AUTO_UPDATE_CORE', false );
-```
 
 ## License
 
