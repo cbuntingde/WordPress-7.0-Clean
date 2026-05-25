@@ -14,21 +14,110 @@ wp_enqueue_script( 'plugin-install' );
 wp_enqueue_script( 'updates' );
 add_thickbox();
 
-// Fork-specific: Show loading overlay ONLY when update form is submitted.
+// Fork-specific: AJAX handlers for core update and backup operations.
 add_action( 'admin_footer', function() {
+	// Localize nonces for AJAX operations.
+	wp_add_inline_script( 'updates', 'var wpUpdatesApi = wpUpdatesApi || {}; wpUpdatesApi.nonce = ' . wp_json_encode( array(
+		'core_update' => wp_create_nonce( 'core_update_nonce' ),
+		'core_backup' => wp_create_nonce( 'core_backup_nonce' ),
+	) ) . ';' , 'before' );
 	?>
 	<div id="core-update-loading" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);z-index:99999;">
 		<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;padding:40px;border-radius:12px;text-align:center;max-width:400px;width:90%">
 			<span class="spinner" style="float:none;margin:0 auto 20px;width:40px;height:40px;border-width:4px"></span>
-			<h2 style="margin:0 0 10px">Updating WordPress</h2>
-			<p style="margin:0;color:#666">This may take several minutes depending on your site size.</p>
+			<h2 style="margin:0 0 10px" id="loading-title">Processing...</h2>
+			<p style="margin:0;color:#666" id="loading-message">Please wait...</p>
 		</div>
 	</div>
 	<script>
 	jQuery(document).ready(function($){
-		// Only show overlay for CORE update form (uses ID to avoid triggering on plugins/themes)
-		$('#core-upgrade-form').on('submit', function(e){
-			$('#core-update-loading').css('display', 'block');
+		var $loadingOverlay = $('#core-update-loading');
+		var $loadingTitle = $('#loading-title');
+		var $loadingMessage = $('#loading-message');
+		var $progressBar = $('#core-update-progress-bar');
+
+		function showLoading(title, message) {
+			$loadingTitle.text(title);
+			$loadingMessage.text(message);
+			$loadingOverlay.css('display', 'block');
+			$('#core-update-progress').css('display', 'block');
+		}
+
+		function hideLoading() {
+			$loadingOverlay.css('display', 'none');
+			$('#core-update-progress').css('display', 'none');
+		}
+
+		function updateProgress(percent, message) {
+			$progressBar.css('width', percent + '%');
+			if (message) {
+				$loadingMessage.text(message);
+			}
+		}
+
+		// Update Now button - AJAX to admin-ajax.php
+		$('#core-update-btn').on('click', function(){
+			var $btn = $(this);
+			$btn.prop('disabled', true);
+			showLoading('Updating WordPress', 'Starting update...');
+
+			$.ajax({
+				url: ajaxurl,
+				type: 'POST',
+				data: {
+					action: 'do_core_update',
+					_wpnonce: wpUpdatesApi.nonce.core_update
+				},
+				success: function(response) {
+					if (response.success) {
+						updateProgress(100, 'Update complete!');
+						window.location.href = response.data.redirect || '<?php echo esc_url( self_admin_url( 'about.php?updated' ) ); ?>';
+					} else {
+						alert(response.data.message || 'Update failed.');
+						hideLoading();
+						$btn.prop('disabled', false);
+					}
+				},
+				error: function(xhr, status, error) {
+					alert('Update failed: ' + error);
+					hideLoading();
+					$btn.prop('disabled', false);
+				}
+			});
+		});
+
+		// Create Backup button - AJAX to admin-ajax.php
+		$('#core-backup-btn').on('click', function(){
+			var $btn = $(this);
+			$btn.prop('disabled', true);
+			showLoading('Creating Backup', 'Initializing backup...');
+
+			$.ajax({
+				url: ajaxurl,
+				type: 'POST',
+				data: {
+					action: 'do_core_backup',
+					_wpnonce: wpUpdatesApi.nonce.core_backup
+				},
+				success: function(response) {
+					if (response.success) {
+						updateProgress(100, 'Backup complete!');
+						alert('Backup created successfully!');
+						hideLoading();
+						$btn.prop('disabled', false);
+						window.location.reload();
+					} else {
+						alert(response.data.message || 'Backup failed.');
+						hideLoading();
+						$btn.prop('disabled', false);
+					}
+				},
+				error: function(xhr, status, error) {
+					alert('Backup failed: ' + error);
+					hideLoading();
+					$btn.prop('disabled', false);
+				}
+			});
 		});
 	});
 	</script>
@@ -372,19 +461,15 @@ function core_upgrade_preamble() {
 
 		<div class="core-update-actions">
 			<?php if ( $can_update ) : ?>
-				<a href="<?php echo esc_url( self_admin_url( 'update-core.php?action=upgrade' ) ); ?>" class="button button-primary" id="update-now-btn">
+				<button type="button" class="button button-primary" id="core-update-btn">
 					<?php _e( 'Update Now' ); ?>
-				</a>
+				</button>
 			<?php endif; ?>
 
 			<?php if ( current_user_can( 'update_core' ) ) : ?>
-				<form method="post" action="<?php echo esc_url( self_admin_url( 'update-core.php' ) ); ?>" style="display:inline;" id="backup-form">
-					<?php wp_nonce_field( 'backup-core' ); ?>
-					<input type="hidden" name="action" value="do-core-backup" />
-					<button type="submit" class="button" id="create-backup-btn">
-						<?php _e( 'Create Backup' ); ?>
-					</button>
-				</form>
+				<button type="button" class="button" id="core-backup-btn">
+					<?php _e( 'Create Backup' ); ?>
+				</button>
 			<?php endif; ?>
 		</div>
 
@@ -611,7 +696,7 @@ function list_plugin_updates() {
 <p><?php _e( 'The following plugins have new versions available. Check the ones you want to update and then click &#8220;Update Plugins&#8221;.' ); ?></p>
 <form method="post" action="<?php echo esc_url( $form_action ); ?>" name="upgrade-plugins" class="upgrade">
 	<?php wp_nonce_field( 'upgrade-core' ); ?>
-<p><input id="upgrade-plugins" class="button" type="submit" value="<?php esc_attr_e( 'Update Plugins' ); ?>" name="upgrade" /></p>
+<p><input id="upgrade-plugins" class="button" type="button" value="<?php esc_attr_e( 'Update Plugins' ); ?>" name="upgrade" /></p>
 <table class="widefat updates-table" id="update-plugins-table">
 	<thead>
 	<tr>
@@ -744,7 +829,7 @@ function list_plugin_updates() {
 	</tr>
 	</tfoot>
 </table>
-<p><input id="upgrade-plugins-2" class="button" type="submit" value="<?php esc_attr_e( 'Update Plugins' ); ?>" name="upgrade" /></p>
+<p><input id="upgrade-plugins-2" class="button" type="button" value="<?php esc_attr_e( 'Update Plugins' ); ?>" name="upgrade" /></p>
 </form>
 	<?php
 }
@@ -787,7 +872,7 @@ function list_theme_updates() {
 </p>
 <form method="post" action="<?php echo esc_url( $form_action ); ?>" name="upgrade-themes" class="upgrade">
 	<?php wp_nonce_field( 'upgrade-core' ); ?>
-<p><input id="upgrade-themes" class="button" type="submit" value="<?php esc_attr_e( 'Update Themes' ); ?>" name="upgrade" /></p>
+<p><input id="upgrade-themes" class="button" type="button" value="<?php esc_attr_e( 'Update Themes' ); ?>" name="upgrade" /></p>
 <table class="widefat updates-table" id="update-themes-table">
 	<thead>
 	<tr>
@@ -920,7 +1005,7 @@ function list_theme_updates() {
 	</tr>
 	</tfoot>
 </table>
-<p><input id="upgrade-themes-2" class="button" type="submit" value="<?php esc_attr_e( 'Update Themes' ); ?>" name="upgrade" /></p>
+<p><input id="upgrade-themes-2" class="button" type="button" value="<?php esc_attr_e( 'Update Themes' ); ?>" name="upgrade" /></p>
 </form>
 	<?php
 }
@@ -946,7 +1031,7 @@ function list_translation_updates() {
 	<form method="post" action="<?php echo esc_url( $form_action ); ?>" name="upgrade-translations" class="upgrade">
 		<p><?php _e( 'New translations are available.' ); ?></p>
 		<?php wp_nonce_field( 'upgrade-translations' ); ?>
-		<p><input class="button" type="submit" value="<?php esc_attr_e( 'Update Translations' ); ?>" name="upgrade" /></p>
+		<p><input class="button" type="button" value="<?php esc_attr_e( 'Update Translations' ); ?>" name="upgrade" /></p>
 	</form>
 	<?php
 }
