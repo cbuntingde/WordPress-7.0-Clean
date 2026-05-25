@@ -173,6 +173,108 @@ add_action( 'wp_ajax_nopriv_heartbeat', 'wp_ajax_nopriv_heartbeat', 1 );
 // Register Plugin Dependencies Ajax calls.
 add_action( 'wp_ajax_check_plugin_dependencies', array( 'WP_Plugin_Dependencies', 'check_plugin_dependencies_during_ajax' ) );
 
+/**
+ * AJAX handler for core backup before update.
+ *
+ * Backup WordPress core files before performing a core update.
+ *
+ * @since 7.0
+ */
+add_action( 'wp_ajax_do_core_backup', 'wp_ajax_do_core_backup' );
+function wp_ajax_do_core_backup() {
+	check_ajax_referer( 'core_backup_nonce', '_wpnonce' );
+
+	if ( ! current_user_can( 'update_core' ) ) {
+		wp_send_json_error( array( 'message' => __( 'Permission denied' ) ), 403 );
+	}
+
+	@ini_set( 'implicit_flush', 1 );
+
+	require_once ABSPATH . 'wp-admin/includes/file.php';
+	require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+	require_once ABSPATH . 'wp-admin/includes/class-core-upgrader.php';
+
+	$credentials = request_filesystem_credentials( '', '', false, ABSPATH );
+	if ( ! $credentials || ! WP_Filesystem( $credentials, ABSPATH ) ) {
+		wp_send_json_error( array( 'message' => __( 'Filesystem connection failed' ) ), 500 );
+	}
+
+	$upgrader = new Core_Upgrader();
+
+	ob_start();
+	$result = $upgrader->create_backup_before_update(
+		function( $percent, $message ) {
+			echo json_encode( array( 'progress' => $percent, 'message' => $message ) ) . "\n";
+			flush();
+			ob_flush();
+		}
+	);
+	ob_end_clean();
+
+	if ( is_wp_error( $result ) ) {
+		wp_send_json_error( array( 'message' => $result->get_error_message() ), 500 );
+	}
+
+	wp_send_json_success(
+		array(
+			'message'  => __( 'Backup created successfully' ),
+			'redirect' => add_query_arg( 'backup', 'success' ),
+		)
+	);
+}
+
+/**
+ * AJAX handler for core update.
+ *
+ * Perform a WordPress core automatic update.
+ *
+ * @since 7.0
+ */
+add_action( 'wp_ajax_do_core_update', 'wp_ajax_do_core_update' );
+function wp_ajax_do_core_update() {
+	check_ajax_referer( 'core_update_nonce', '_wpnonce' );
+
+	if ( ! current_user_can( 'update_core' ) ) {
+		wp_send_json_error( array( 'message' => __( 'Permission denied' ) ), 403 );
+	}
+
+	@ini_set( 'implicit_flush', 1 );
+
+	require_once ABSPATH . 'wp-admin/includes/file.php';
+	require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+	require_once ABSPATH . 'wp-admin/includes/class-core-upgrader.php';
+
+	$credentials = request_filesystem_credentials( '', '', false, ABSPATH );
+	if ( ! $credentials || ! WP_Filesystem( $credentials, ABSPATH ) ) {
+		wp_send_json_error( array( 'message' => __( 'Filesystem connection failed' ) ), 500 );
+	}
+
+	$upgrader = new Core_Upgrader();
+
+	ob_start();
+	$result = $upgrader->upgrade(
+		'wordpress',
+		function( $percent, $message ) {
+			echo json_encode( array( 'progress' => $percent, 'message' => $message ) ) . "\n";
+			flush();
+			ob_flush();
+		}
+	);
+	ob_end_clean();
+
+	if ( is_wp_error( $result ) ) {
+		wp_send_json_error( array( 'message' => $result->get_error_message() ), 500 );
+	}
+
+	wp_send_json_success(
+		array(
+			'message'  => __( 'Core updated successfully' ),
+			'version'  => isset( $result['new_version'] ) ? $result['new_version'] : '',
+			'redirect' => add_query_arg( 'update', 'success' ),
+		)
+	);
+}
+
 $action = $_REQUEST['action'];
 
 if ( is_user_logged_in() ) {
