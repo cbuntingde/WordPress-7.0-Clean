@@ -1,14 +1,5 @@
 [rules]
-defaultAllowList = """
-# Ignore patterns that are examples in comments
-wp-config-sample.php
-.*\.sample\.*
-example.*
-"""
+defaultAllowList = ["wp-config-sample.php", "**/*.sample.*"]
 
 [paths]
-# Don't scan these paths
-exclude = """
-**/*.md
-**/wp-config-sample.php
-"""
+exclude = ["**/*.md", "**/wp-config-sample.php"]
