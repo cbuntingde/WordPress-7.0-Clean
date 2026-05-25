@@ -264,98 +264,153 @@ function dismissed_updates() {
  * @since 2.7.0
  */
 function core_upgrade_preamble() {
-	$updates = get_core_updates();
-
 	// Include an unmodified $wp_version.
 	require ABSPATH . WPINC . '/version.php';
 
-	$is_development_version = preg_match( '/alpha|beta|RC/', $wp_version );
+	$current_version = wp_get_wp_version();
+	$is_development = preg_match( '/alpha|beta|RC/', $wp_version );
 
-	if ( isset( $updates[0]->version ) && version_compare( $updates[0]->version, $wp_version, '>' ) ) {
-		echo '<h2 class="response">';
-		_e( 'An updated version of WordPress is available.' );
-		echo '</h2>';
+	// Get latest version from GitHub.
+	require_once ABSPATH . 'wp-admin/includes/class-core-upgrader.php';
+	$latest_version = Core_Upgrader::get_latest_github_version();
+	$has_update    = $latest_version && version_compare( $latest_version, $current_version, '>' );
 
-		// Fork-specific: backup is created automatically on update.
-		$backup_notice = __( 'Note: A backup of your current WordPress files will be created automatically when you click Update. You can use it to roll back if needed.' );
-		wp_admin_notice(
-			$backup_notice,
-			array(
-				'type'               => 'info',
-				'additional_classes' => array( 'inline' ),
-			)
-		);
+	// Check for available rollback backups.
+	$backup_info = Core_Upgrader::get_available_backups();
 
-		// Fork-specific: Show manual backup button.
-		if ( current_user_can( 'update_core' ) ) {
-			$backup_url = wp_nonce_url( self_admin_url( 'update-core.php?action=do-core-backup' ), 'backup-core' );
-			echo '<p class="backup-buttons hide-if-no-js">';
-			echo '<a href="' . esc_url( $backup_url ) . '" class="button secondary" id="create-backup-btn">' . __( 'Create Backup Now' ) . '</a>';
-			echo '</p>';
-		}
-
-		// Check for available rollback backups from our fork.
-		require_once ABSPATH . 'wp-admin/includes/class-core-upgrader.php';
-		$backup_info = Core_Upgrader::get_available_backups();
-		if ( $backup_info ) {
-			$rollback_url = wp_nonce_url( self_admin_url( 'update-core.php?action=do-rollback' ), 'rollback-core' );
-			$rollback_msg = sprintf(
-				__( 'A backup is available from version %1$s. You can <a href="%2$s">roll back to this version</a> if the update causes issues.' ),
-				esc_html( $backup_info['version'] ),
-				esc_url( $rollback_url )
-			);
-			wp_admin_notice(
-				$rollback_msg,
-				array(
-					'type'               => 'info',
-					'additional_classes' => array( 'inline' ),
-				)
-			);
-		}
-
-		// Always show rollback option if a backup exists.
-		require_once ABSPATH . 'wp-admin/includes/class-core-upgrader.php';
-		$backup_info = Core_Upgrader::get_available_backups();
-		if ( $backup_info ) {
-			$rollback_url = wp_nonce_url( self_admin_url( 'update-core.php?action=do-rollback' ), 'rollback-core' );
-			$rollback_msg = sprintf(
-				__( 'A backup is available from version %1$s. You can <a href="%2$s">roll back to this version</a> if needed.' ),
-				esc_html( $backup_info['version'] ),
-				esc_url( $rollback_url )
-			);
-			wp_admin_notice(
-				$rollback_msg,
-				array(
-					'type'               => 'info',
-					'additional_classes' => array( 'inline' ),
-				)
-			);
-		}
-	} elseif ( $is_development_version ) {
-		echo '<h2 class="response">' . __( 'You are using a development version of WordPress.' ) . '</h2>';
+	// Determine status message.
+	if ( $is_development ) {
+		$status_message = __( 'You are using a development version of WordPress.' );
+	} elseif ( $has_update ) {
+		$status_message = __( 'An updated version of WordPress is available.' );
 	} else {
-		echo '<h2 class="response">' . __( 'You have the latest version of WordPress.' ) . '</h2>';
+		$status_message = __( 'You have the latest version of WordPress.' );
 	}
 
-	echo '<ul class="core-updates">';
-	foreach ( (array) $updates as $update ) {
-		echo '<li>';
-		list_core_update( $update );
-		echo '</li>';
-	}
-	echo '</ul>';
+	// Determine which actions to show.
+	$can_update = current_user_can( 'update_core' ) && $has_update;
 
-	// Don't show the maintenance mode notice when we are only showing a single re-install option.
-	if ( $updates && ( count( $updates ) > 1 || 'latest' !== $updates[0]->response ) ) {
+	?>
+	<style>
+	.core-update-card {
+		background: #fff;
+		border: 1px solid #dcdcde;
+		border-radius: 8px;
+		padding: 16px;
+		margin-bottom: 24px;
+	}
+	.core-update-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 12px;
+	}
+	.core-update-title {
+		font-size: 18px;
+		font-weight: 600;
+		margin: 0;
+	}
+	.core-update-version {
+		font-size: 14px;
+		color: #646970;
+	}
+	.core-update-version strong {
+		color: #2271b1;
+	}
+	.core-update-actions {
+		display: flex;
+		gap: 12px;
+		margin-top: 16px;
+	}
+	.core-update-progress {
+		height: 8px;
+		background: #dcdcde;
+		border-radius: 4px;
+		margin-top: 16px;
+		overflow: hidden;
+		display: none;
+	}
+	.core-update-progress-bar {
+		height: 100%;
+		background: #2271b1;
+		width: 0%;
+		transition: width 0.3s ease;
+	}
+	.core-backup-notice {
+		margin-top: 24px;
+		padding-top: 16px;
+		border-top: 1px solid #dcdcde;
+	}
+	</style>
+
+	<div class="core-update-card">
+		<div class="core-update-header">
+			<h2 class="core-update-title"><?php echo esc_html( $status_message ); ?></h2>
+		</div>
+
+		<p class="core-update-version">
+			<?php
+			printf(
+				/* translators: 1: Current version, 2: Latest version */
+				__( 'Current version: %1$s' ),
+				'<strong>' . esc_html( $current_version ) . '</strong>'
+			);
+			if ( $latest_version ) {
+				echo ' | ';
+				printf(
+					/* translators: Latest version from GitHub */
+					__( 'Latest version: %s' ),
+					'<strong>' . esc_html( $latest_version ) . '</strong>'
+				);
+			}
+			?>
+		</p>
+
+		<div class="core-update-progress" id="core-update-progress">
+			<div class="core-update-progress-bar" id="core-update-progress-bar"></div>
+		</div>
+
+		<div class="core-update-actions">
+			<?php if ( $can_update ) : ?>
+				<a href="<?php echo esc_url( self_admin_url( 'update-core.php?action=upgrade' ) ); ?>" class="button button-primary" id="update-now-btn">
+					<?php _e( 'Update Now' ); ?>
+				</a>
+			<?php endif; ?>
+
+			<?php if ( current_user_can( 'update_core' ) ) : ?>
+				<form method="post" action="<?php echo esc_url( self_admin_url( 'update-core.php' ) ); ?>" style="display:inline;" id="backup-form">
+					<?php wp_nonce_field( 'backup-core' ); ?>
+					<input type="hidden" name="action" value="do-core-backup" />
+					<button type="submit" class="button" id="create-backup-btn">
+						<?php _e( 'Create Backup' ); ?>
+					</button>
+				</form>
+			<?php endif; ?>
+		</div>
+
+		<?php if ( $backup_info ) : ?>
+			<div class="core-backup-notice">
+				<p>
+					<?php
+					printf(
+						__( 'A backup from version %1$s is available. ' ),
+						esc_html( $backup_info['version'] )
+					);
+					$rollback_url = wp_nonce_url( self_admin_url( 'update-core.php?action=do-rollback' ), 'rollback-core' );
+					printf(
+						'<a href="%s">Roll back to this version</a>.',
+						esc_url( $rollback_url )
+					);
+					?>
+				</p>
+			</div>
+		<?php endif; ?>
+	</div>
+
+	<?php
+	// Maintenance mode notice only shows when there's an update.
+	if ( $has_update ) {
 		echo '<p>' . __( 'While your site is being updated, it will be in maintenance mode. As soon as your updates are complete, this mode will be deactivated.' ) . '</p>';
-	} elseif ( ! $updates ) {
-		list( $normalized_version ) = explode( '-', $wp_version );
-		echo '<p>' . sprintf(
-			/* translators: 1: URL to About screen, 2: WordPress version. */
-			__( '<a href="%1$s">Learn more about WordPress %2$s</a>.' ),
-			esc_url( self_admin_url( 'about.php' ) ),
-			$normalized_version
-		) . '</p>';
 	}
 
 	dismissed_updates();
