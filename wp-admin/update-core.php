@@ -12,7 +12,7 @@ require_once __DIR__ . '/admin.php';
 wp_enqueue_style( 'plugin-install' );
 wp_enqueue_script( 'plugin-install' );
 wp_enqueue_script( 'updates' );
-add_thickbox();
+// add_thickbox(); // Temporarily disabled
 
 
 if ( is_multisite() && ! is_network_admin() ) {
