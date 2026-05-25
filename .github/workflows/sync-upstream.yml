@@ -25,18 +25,23 @@ jobs:
         run: |
           git config user.name 'GitHub Actions'
           git config user.email 'actions@github.com'
+          echo "BRANCH_NAME=sync-upstream-$(date +%Y%m%d)" >> $GITHUB_ENV
           git checkout -b sync-upstream-$(date +%Y%m%d) upstream/master
           git merge master --no-edit || true
 
       - name: Create PR
         uses: actions/github-script@v7
         with:
+          result-encoding: string
           script: |
+            const branchName = process.env.BRANCH_NAME;
             const { repo, owner } = context.repo;
             const pr = await github.rest.pulls.create({
+              owner: owner,
+              repo: repo,
               title: 'Sync: Merge upstream WordPress changes',
               body: 'Automated PR to sync with upstream WordPress/master',
-              head: context.ref,
+              head: branchName,
               base: 'master',
             });
             console.log(`Created PR #${pr.data.number}`);
