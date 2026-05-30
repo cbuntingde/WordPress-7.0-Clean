@@ -309,8 +309,13 @@ require ABSPATH . WPINC . '/abilities-api/class-wp-ability.php';
 require ABSPATH . WPINC . '/abilities-api/class-wp-abilities-registry.php';
 require ABSPATH . WPINC . '/abilities-api.php';
 require ABSPATH . WPINC . '/abilities.php';
-require ABSPATH . WPINC . '/rest-api.php';
-require ABSPATH . WPINC . '/rest-api/class-wp-rest-server.php';
+// Lazy load REST API - only on REST requests
+if ( ( defined( 'REST_REQUEST' ) && REST_REQUEST )
+	|| ! empty( $_GET['rest_route'] )
+	|| ! empty( $_POST['rest_route'] )
+) {
+	require ABSPATH . WPINC . '/rest-api.php';
+}
 require ABSPATH . WPINC . '/rest-api/class-wp-rest-response.php';
 require ABSPATH . WPINC . '/rest-api/class-wp-rest-request.php';
 require ABSPATH . WPINC . '/rest-api/endpoints/class-wp-rest-controller.php';
@@ -746,11 +751,13 @@ unset( $theme, $wp_theme );
  */
 do_action( 'after_setup_theme' );
 
-// Create an instance of WP_Site_Health so that Cron events may fire.
-if ( ! class_exists( 'WP_Site_Health' ) ) {
-	require_once ABSPATH . 'wp-admin/includes/class-wp-site-health.php';
+// Load Site Health lazily in admin context
+if ( is_admin() || wp_doing_cron() ) {
+	if ( ! class_exists( 'WP_Site_Health' ) ) {
+		require_once ABSPATH . 'wp-admin/includes/class-wp-site-health.php';
+	}
+	WP_Site_Health::get_instance();
 }
-WP_Site_Health::get_instance();
 
 // Set up current user.
 $GLOBALS['wp']->init();
